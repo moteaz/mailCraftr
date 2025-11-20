@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { PrismaClient } from '@prisma/client';
   ],
   controllers: [AuthController],
   providers: [
+    JwtStrategy,
     AuthService,
     {
       provide: PrismaClient, // better practice to inject PrismaClient
