@@ -1,10 +1,10 @@
 import DashboardLayout from '@/app/components/dashboard/dashboardLayout';
 
-export default function DashboardPage() {
+export default function CreateCategoryPage() {
   return (
     <DashboardLayout>
       <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-800">Hello Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Create Category Page</h1>
       </div>
     </DashboardLayout>
   );

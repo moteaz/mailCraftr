@@ -13,7 +13,7 @@ export default function Home() {
     if (token && isTokenValid(token)) {
       router.push('/dashboard');  
     } else {
-      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
       router.push('/login');
     }
   }, [router]);
