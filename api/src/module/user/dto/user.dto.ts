@@ -1,19 +1,24 @@
+// dto/user.dto.ts
 import {
   IsEmail,
-  IsNotEmpty,
-  IsOptional,
+  IsString,
   MinLength,
-  MaxLength,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
+import { Role } from '@prisma/client';
 
 export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @IsNotEmpty()
+  @IsString()
   @MinLength(6)
-  @MaxLength(20)
   password: string;
+
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role; // Allow SUPERADMIN to assign roles
 }
 
 export class UpdateUserDto {
@@ -22,7 +27,11 @@ export class UpdateUserDto {
   email?: string;
 
   @IsOptional()
+  @IsString()
   @MinLength(6)
-  @MaxLength(20)
   password?: string;
+
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
 }
