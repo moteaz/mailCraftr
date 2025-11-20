@@ -49,7 +49,6 @@ export class UserService {
         email: true,
         role: true,
         createdAt: true,
-        // Exclude password from results
       },
     });
   }
@@ -72,6 +71,9 @@ export class UserService {
   async update(id: number, dto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
+    if (user.role === 'SUPERADMIN') {
+      throw new ConflictException('Cannot change role of SUPERADMIN user');
+    }
 
     const updateData: any = { ...dto };
 
@@ -94,6 +96,9 @@ export class UserService {
   async remove(id: number) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
+    if (user.role === 'SUPERADMIN') {
+      throw new ConflictException('Cannot delete SUPERADMIN user');
+    }
 
     return this.prisma.user.delete({
       where: { id },
