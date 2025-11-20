@@ -11,6 +11,11 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // throws error if extra properties sent
     }),
   );
+  // Enable CORS
+  app.enableCors({
+    origin: 'http://localhost:3000', // Your Next.js frontend URL
+    credentials: true,
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
