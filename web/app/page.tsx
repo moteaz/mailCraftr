@@ -1,32 +1,18 @@
-// app/page.tsx
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { isTokenExpired } from "@/lib/jwt";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { session } from '@/lib/auth/session';
+import { ROUTES } from '@/lib/constants';
+import { Spinner } from '@/components/ui/spinner';
 
-export default function HomeRedirect() {
+export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-      if (token && !isTokenExpired(token)) {
-        // Use replace so the redirect page isn't kept in history
-        router.replace("/dashboard");
-      } else {
-        localStorage.removeItem("accessToken");
-        router.replace("/login");
-      }
-    } catch (err) {
-      // On any error, send to login
-      router.replace("/login");
-    }
+    const isAuth = session.isAuthenticated();
+    router.replace(isAuth ? ROUTES.DASHBOARD : ROUTES.LOGIN);
   }, [router]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-sm text-gray-600">Redirecting…</p>
-    </div>
-  );
+  return <Spinner />;
 }
