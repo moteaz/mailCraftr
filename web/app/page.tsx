@@ -1,22 +1,32 @@
-'use client';
+// app/page.tsx
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { isTokenValid } from '../app/utils/auth';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { isTokenExpired } from "@/lib/jwt";
 
-export default function Home() {
+export default function HomeRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-
-    if (token && isTokenValid(token)) {
-      router.push('/dashboard');  
-    } else {
-      localStorage.removeItem('accessToken');
-      router.push('/login');
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+      if (token && !isTokenExpired(token)) {
+        // Use replace so the redirect page isn't kept in history
+        router.replace("/dashboard");
+      } else {
+        localStorage.removeItem("accessToken");
+        router.replace("/login");
+      }
+    } catch (err) {
+      // On any error, send to login
+      router.replace("/login");
     }
   }, [router]);
 
-  return <p>Loading...</p>;
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-sm text-gray-600">Redirecting…</p>
+    </div>
+  );
 }
