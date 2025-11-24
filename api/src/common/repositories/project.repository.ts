@@ -27,7 +27,8 @@ export class ProjectRepository {
     });
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
     return this.prisma.project.findMany({
       select: {
         id: true,
@@ -43,7 +44,13 @@ export class ProjectRepository {
         },
       },
       orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
     });
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.project.count();
   }
 
   async create(data: { title: string; description?: string; ownerId: number }) {

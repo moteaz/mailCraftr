@@ -5,6 +5,7 @@ import { Mail, Lock, UserPlus, Users as UsersIcon, X, Trash2, User, FolderOpen }
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { Pagination } from '@/components/shared/Pagination';
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { validators, validationMessages } from '@/lib/utils/validators';
@@ -13,7 +14,9 @@ import { toast } from 'sonner';
 import type { User, ApiError } from '@/lib/api/types';
 
 export default function UsersPage() {
-  const { users, projects, fetchUsers, fetchProjects, refetchUsers, refetchProjects } = useDataStore();
+  const { fetchProjects } = useDataStore();
+  const [users, setUsers] = useState<User[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ email: '', password: '', projectIds: [] as string[] });
@@ -22,11 +25,37 @@ export default function UsersPage() {
   const [deleteUserModal, setDeleteUserModal] = useState<number | null>(null);
   const [deletingUser, setDeletingUser] = useState(false);
   const [searchProject, setSearchProject] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const limit = 10;
+
+  const filteredUsers = users.filter((user) =>
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const loadUsers = async (page: number = 1) => {
+    try {
+      const response = await apiClient.get<any>(API_ENDPOINTS.USER.PAGINATED(page, limit));
+      setUsers(response.data);
+      setTotalPages(response.meta.totalPages);
+      setTotal(response.meta.total);
+      setCurrentPage(page);
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(error.message || 'Failed to load users');
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        await Promise.all([fetchUsers(), fetchProjects()]);
+        const [_, projectsRes] = await Promise.all([
+          loadUsers(1),
+          apiClient.get<any>(API_ENDPOINTS.PROJECT.LIST),
+        ]);
+        setProjects(Array.isArray(projectsRes) ? projectsRes : projectsRes.data || []);
       } catch (err) {
         const error = err as ApiError;
         toast.error(error.message || 'Failed to load data');
@@ -35,7 +64,7 @@ export default function UsersPage() {
       }
     };
     loadData();
-  }, [fetchUsers, fetchProjects]);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -81,7 +110,7 @@ export default function UsersPage() {
       setForm({ email: '', password: '', projectIds: [] });
       setSearchProject('');
       setIsModalOpen(false);
-      await refetchUsers();
+      await loadUsers(currentPage);
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to create user');
@@ -98,7 +127,7 @@ export default function UsersPage() {
       await apiClient.delete(`/user/${deleteUserModal}`);
       toast.success('User deleted successfully!');
       setDeleteUserModal(null);
-      await refetchUsers();
+      await loadUsers(currentPage);
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to delete user');
@@ -133,13 +162,27 @@ export default function UsersPage() {
           </button>
         </div>
 
-        {users.length === 0 ? (
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="text-sm text-gray-600">
+            Showing {users.length} of {total} users
+          </div>
+          <input
+            type="text"
+            placeholder="🔍 Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+          />
+        </div>
+
+        {filteredUsers.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">No users found</p>
           </div>
         ) : (
-          <div className="grid gap-4">
-            {users.map((user) => (
+          <>
+            <div className="grid gap-4">
+            {filteredUsers.map((user) => (
               <div
                 key={user.id}
                 className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-gray-50"
@@ -174,7 +217,13 @@ export default function UsersPage() {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={loadUsers}
+            />
+          </>
         )}
       </div>
 

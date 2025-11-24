@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
@@ -27,9 +28,14 @@ export class UserController {
   }
 
   @Get()
-  @Roles(Role.SUPERADMIN) // Only SUPERADMIN can list all users
-  findAll() {
-    return this.userService.findAll();
+  @Roles(Role.SUPERADMIN)
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.userService.findAll(pageNum, limitNum);
   }
 
   @Get(':id')

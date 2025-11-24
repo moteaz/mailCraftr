@@ -30,8 +30,21 @@ export class UserService {
     };
   }
 
-  async findAll() {
-    return this.userRepository.findAll();
+  async findAll(page: number = 1, limit: number = 10) {
+    const [users, total] = await Promise.all([
+      this.userRepository.findAll(page, limit),
+      this.userRepository.count(),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOne(id: number) {
