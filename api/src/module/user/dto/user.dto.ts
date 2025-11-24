@@ -1,10 +1,10 @@
-// dto/user.dto.ts
 import {
   IsEmail,
   IsString,
   MinLength,
   IsEnum,
   IsOptional,
+  Matches,
 } from 'class-validator';
 import { Role } from '@prisma/client';
 
@@ -13,12 +13,15 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message: 'Password must contain uppercase, lowercase, number and special character',
+  })
   password: string;
 
   @IsOptional()
   @IsEnum(Role)
-  role?: Role; // Allow SUPERADMIN to assign roles
+  role?: Role;
 }
 
 export class UpdateUserDto {
@@ -28,7 +31,10 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(6)
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message: 'Password must contain uppercase, lowercase, number and special character',
+  })
   password?: string;
 
   @IsOptional()

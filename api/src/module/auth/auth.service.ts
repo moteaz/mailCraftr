@@ -1,30 +1,34 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
+import { UserRepository } from '../../common/repositories/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async login(dto: LoginDto) {
     const { email, password } = dto;
 
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      select: { id: true, email: true, password: true, role: true },
-    });
+    const user = await this.userRepository.findByEmail(email);
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    // Always compare password even if user not found (timing attack prevention)
+    const isPasswordValid = user
+      ? await bcrypt.compare(password, user.password)
+      : await bcrypt.compare(password, '$2b$12$invalidhashfortimingatttack');
+
+    if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
     const { password: _, ...userWithoutPassword } = user;
+
     return {
       message: 'Login successful',
       accessToken,
