@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Delete,
+  Get,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import {
@@ -29,6 +30,17 @@ export class ProjectController {
   create(@Body() createProjectDto: CreateProjectDto, @Req() req) {
     const userId = req.user.id;
     return this.projectService.create(createProjectDto, userId);
+  }
+  @Delete(':id')
+  @Roles(Role.SUPERADMIN)
+  deleteProject(@Param('id', ParseIntPipe) ProjectId: number) {
+    return this.projectService.DeleteProject(ProjectId);
+  }
+
+  @Get()
+  @Roles(Role.SUPERADMIN)
+  getAllProjects() {
+    return this.projectService.getAllProjects();
   }
 
   @Post(':id/add-user')
