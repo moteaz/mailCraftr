@@ -7,12 +7,15 @@ import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/shared/Pagination';
 import { useDataStore } from '@/store/data-store';
 import { toast } from 'sonner';
 import type { Project, ApiError } from '@/lib/api/types';
 
 export default function ProjectsListPage() {
-  const { projects, users, fetchProjects, fetchUsers, refetchProjects } = useDataStore();
+  const { fetchUsers } = useDataStore();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', userEmails: [] as string[] });
@@ -26,11 +29,37 @@ export default function ProjectsListPage() {
   const [deletingUser, setDeletingUser] = useState(false);
   const [deleteProjectModal, setDeleteProjectModal] = useState<number | null>(null);
   const [deletingProject, setDeletingProject] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const limit = 10;
+
+  const filteredProjects = projects.filter((project) =>
+    project.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const loadProjects = async (page: number = 1) => {
+    try {
+      const response = await apiClient.get<any>(API_ENDPOINTS.PROJECT.PAGINATED(page, limit));
+      setProjects(response.data);
+      setTotalPages(response.meta.totalPages);
+      setTotal(response.meta.total);
+      setCurrentPage(page);
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(error.message || 'Failed to load projects');
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        await Promise.all([fetchProjects(), fetchUsers()]);
+        const [_, usersRes] = await Promise.all([
+          loadProjects(1),
+          apiClient.get<any>(API_ENDPOINTS.USER.LIST),
+        ]);
+        setUsers(Array.isArray(usersRes) ? usersRes : usersRes.data || []);
       } catch (err) {
         const error = err as ApiError;
         toast.error(error.message || 'Failed to load data');
@@ -39,7 +68,7 @@ export default function ProjectsListPage() {
       }
     };
     loadData();
-  }, [fetchProjects, fetchUsers]);
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +91,7 @@ export default function ProjectsListPage() {
       setForm({ title: '', description: '', userEmails: [] });
       setSearchUser('');
       setIsModalOpen(false);
-      await refetchProjects();
+      await loadProjects(currentPage);
     } catch (err) {
       const error = err as ApiError;
       console.error('Error creating project:', err);
@@ -85,7 +114,7 @@ export default function ProjectsListPage() {
       toast.success('User added successfully!');
       setUserEmail('');
       setAddUserModal(null);
-      await refetchProjects();
+      await loadProjects(currentPage);
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to add user');
@@ -102,7 +131,7 @@ export default function ProjectsListPage() {
       await apiClient.delete(`/project/${deleteUserModal.projectId}/delete-user`, { email: deleteUserModal.email });
       toast.success('User removed successfully!');
       setDeleteUserModal(null);
-      await refetchProjects();
+      await loadProjects(currentPage);
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to remove user');
@@ -119,7 +148,7 @@ export default function ProjectsListPage() {
       await apiClient.delete(`/project/${deleteProjectModal}`);
       toast.success('Project deleted successfully!');
       setDeleteProjectModal(null);
-      await refetchProjects();
+      await loadProjects(currentPage);
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to delete project');
@@ -154,13 +183,27 @@ export default function ProjectsListPage() {
           </button>
         </div>
 
-        {projects.length === 0 ? (
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="text-sm text-gray-600">
+            Showing {projects.length} of {total} projects
+          </div>
+          <input
+            type="text"
+            placeholder="🔍 Search projects..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 w-64"
+          />
+        </div>
+
+        {filteredProjects.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">No projects found</p>
           </div>
         ) : (
-          <div className="grid gap-4">
-            {projects.map((project) => (
+          <>
+            <div className="grid gap-4">
+            {filteredProjects.map((project) => (
               <div
                 key={project.id}
                 className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
@@ -232,7 +275,13 @@ export default function ProjectsListPage() {
                 )}
               </div>
             ))}
-          </div>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={loadProjects}
+            />
+          </>
         )}
       </div>
 

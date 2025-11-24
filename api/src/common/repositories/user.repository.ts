@@ -20,11 +20,18 @@ export class UserRepository {
     });
   }
 
-  async findAll() {
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
     return this.prisma.user.findMany({
       select: { id: true, email: true, role: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
     });
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.user.count();
   }
 
   async create(data: { email: string; password: string; role?: Role }) {

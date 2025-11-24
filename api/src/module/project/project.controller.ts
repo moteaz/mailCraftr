@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Delete,
   Get,
+  Query,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import {
@@ -39,8 +40,13 @@ export class ProjectController {
 
   @Get()
   @Roles(Role.SUPERADMIN)
-  getAllProjects() {
-    return this.projectService.getAllProjects();
+  getAllProjects(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.projectService.getAllProjects(pageNum, limitNum);
   }
 
   @Post(':id/add-user')

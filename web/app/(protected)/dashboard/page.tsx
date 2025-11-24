@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useDataStore } from "@/store/data-store";
+import { apiClient } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { Users, FolderOpen } from "lucide-react";
 
 export default function DashboardPage() {
@@ -10,26 +11,22 @@ export default function DashboardPage() {
   const [userCount, setUserCount] = useState(0);
   const [projectCount, setProjectCount] = useState(0);
 
-  const { users, projects, fetchUsers, fetchProjects } = useDataStore();
-
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        await Promise.all([fetchUsers(), fetchProjects()]);
-        setUserCount(users.length);
-        setProjectCount(projects.length);
+        const [usersRes, projectsRes] = await Promise.all([
+          apiClient.get<any>(API_ENDPOINTS.USER.PAGINATED(1, 1)),
+          apiClient.get<any>(API_ENDPOINTS.PROJECT.PAGINATED(1, 1)),
+        ]);
+        setUserCount(usersRes.meta.total);
+        setProjectCount(projectsRes.meta.total);
       } catch (err) {
         console.error('Failed to fetch counts:', err);
       }
     };
 
     fetchCounts();
-  }, [fetchUsers, fetchProjects]);
-
-  useEffect(() => {
-    setUserCount(users.length);
-    setProjectCount(projects.length);
-  }, [users, projects]);
+  }, []);
 
   const stats = [
     {

@@ -108,7 +108,20 @@ export class ProjectService {
     return this.projectRepository.removeUser(ProjectId, user.id);
   }
 
-  async getAllProjects() {
-    return this.projectRepository.findAll();
+  async getAllProjects(page: number = 1, limit: number = 10) {
+    const [projects, total] = await Promise.all([
+      this.projectRepository.findAll(page, limit),
+      this.projectRepository.count(),
+    ]);
+
+    return {
+      data: projects,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 }
