@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import type { User, ApiError } from '@/lib/api/types';
 
 export default function UsersPage() {
-  const { users, setUsers, projects, setProjects } = useDataStore();
+  const { users, projects, fetchUsers, fetchProjects, refetchUsers, refetchProjects } = useDataStore();
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ email: '', password: '', projectIds: [] as string[] });
@@ -23,32 +23,19 @@ export default function UsersPage() {
   const [deletingUser, setDeletingUser] = useState(false);
   const [searchProject, setSearchProject] = useState('');
 
-  const fetchUsers = async () => {
-    try {
-      const data = await apiClient.get<User[]>(API_ENDPOINTS.USER.LIST);
-      setUsers(data);
-    } catch (err) {
-      const error = err as ApiError;
-      toast.error(error.message || 'Failed to load users');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
-    try {
-      const data = await apiClient.get(API_ENDPOINTS.PROJECT.LIST);
-      console.log('Fetched projects:', data);
-      setProjects(data);
-    } catch (err) {
-      console.error('Failed to fetch projects:', err);
-    }
-  };
+    const loadData = async () => {
+      try {
+        await Promise.all([fetchUsers(), fetchProjects()]);
+      } catch (err) {
+        const error = err as ApiError;
+        toast.error(error.message || 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [fetchUsers, fetchProjects]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -94,7 +81,7 @@ export default function UsersPage() {
       setForm({ email: '', password: '', projectIds: [] });
       setSearchProject('');
       setIsModalOpen(false);
-      fetchUsers();
+      await refetchUsers();
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to create user');
@@ -111,7 +98,7 @@ export default function UsersPage() {
       await apiClient.delete(`/user/${deleteUserModal}`);
       toast.success('User deleted successfully!');
       setDeleteUserModal(null);
-      fetchUsers();
+      await refetchUsers();
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to delete user');
