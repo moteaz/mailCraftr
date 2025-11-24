@@ -5,16 +5,14 @@ import { Mail, Lock, UserPlus, Users as UsersIcon, X, Trash2, User, FolderOpen }
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { Pagination } from '@/components/shared/Pagination';
+import { Pagination } from '@/components/ui/pagination';
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { validators, validationMessages } from '@/lib/utils/validators';
-import { useDataStore } from '@/store/data-store';
 import { toast } from 'sonner';
 import type { User, ApiError } from '@/lib/api/types';
 
 export default function UsersPage() {
-  const { fetchProjects } = useDataStore();
   const [users, setUsers] = useState<User[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
