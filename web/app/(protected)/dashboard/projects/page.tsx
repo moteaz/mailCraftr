@@ -7,13 +7,11 @@ import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Pagination } from '@/components/shared/Pagination';
-import { useDataStore } from '@/store/data-store';
+import { Pagination } from '@/components/ui/pagination';
 import { toast } from 'sonner';
 import type { Project, ApiError } from '@/lib/api/types';
 
 export default function ProjectsListPage() {
-  const { fetchUsers } = useDataStore();
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
