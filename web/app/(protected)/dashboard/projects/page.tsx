@@ -1,21 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FolderOpen, Calendar, User, Plus, X, Users, UserPlus, Trash2 } from 'lucide-react';
+import { FolderOpen, Calendar, User, Plus, X, Users, UserPlus, Trash2, Mail } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { Spinner } from '@/components/ui/spinner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useDataStore } from '@/store/data-store';
 import { toast } from 'sonner';
 import type { Project, ApiError } from '@/lib/api/types';
 
 export default function ProjectsListPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { projects, setProjects, users } = useDataStore();
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '' });
+  const [form, setForm] = useState({ title: '', description: '', userEmails: [] as string[] });
   const [creating, setCreating] = useState(false);
+  const [searchUser, setSearchUser] = useState('');
   const [expandedProject, setExpandedProject] = useState<number | null>(null);
   const [addUserModal, setAddUserModal] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState('');
@@ -50,13 +52,22 @@ export default function ProjectsListPage() {
 
     setCreating(true);
     try {
-      await apiClient.post(API_ENDPOINTS.PROJECT.LIST, form);
+      const projectData = { title: form.title, description: form.description };
+      const response: any = await apiClient.post(API_ENDPOINTS.PROJECT.LIST, projectData);
+      const projectId = response.project.id;
+      
+      for (const email of form.userEmails) {
+        await apiClient.post(`/project/${projectId}/add-user`, { email });
+      }
+      
       toast.success('Project created successfully!');
-      setForm({ title: '', description: '' });
+      setForm({ title: '', description: '', userEmails: [] });
+      setSearchUser('');
       setIsModalOpen(false);
       fetchProjects();
     } catch (err) {
       const error = err as ApiError;
+      console.error('Error creating project:', err);
       toast.error(error.message || 'Failed to create project');
     } finally {
       setCreating(false);
@@ -90,9 +101,7 @@ export default function ProjectsListPage() {
 
     setDeletingUser(true);
     try {
-      await apiClient.delete(`/project/${deleteUserModal.projectId}/add-user`, {
-        body: JSON.stringify({ email: deleteUserModal.email }),
-      });
+      await apiClient.delete(`/project/${deleteUserModal.projectId}/delete-user`, { email: deleteUserModal.email });
       toast.success('User removed successfully!');
       setDeleteUserModal(null);
       fetchProjects();
@@ -382,6 +391,84 @@ export default function ProjectsListPage() {
                   rows={4}
                   className="block w-full px-3 py-3 border border-gray-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
                 />
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+                <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-blue-600" />
+                  Assign Users (Optional)
+                </label>
+                <div className="relative mb-3">
+                  <input
+                    type="text"
+                    placeholder="🔍 Search users..."
+                    value={searchUser}
+                    onChange={(e) => setSearchUser(e.target.value)}
+                    className="block w-full px-4 py-2.5 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white shadow-sm"
+                    disabled={creating}
+                  />
+                  {searchUser && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchUser('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {form.userEmails.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {form.userEmails.map((email) => (
+                      <div key={email} className="flex items-center gap-2 bg-white border-2 border-blue-300 rounded-lg px-3 py-2 shadow-sm">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                          <User className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="font-medium text-sm text-gray-800">{email}</span>
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, userEmails: form.userEmails.filter(e => e !== email) })}
+                          className="p-1 hover:bg-red-50 text-red-600 rounded transition-colors"
+                          disabled={creating}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {searchUser && (
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value && !form.userEmails.includes(e.target.value)) {
+                        setForm({ ...form, userEmails: [...form.userEmails, e.target.value] });
+                        setSearchUser('');
+                      }
+                    }}
+                    className="block w-full px-4 py-2.5 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 transition-all bg-white shadow-sm font-medium text-gray-700"
+                    disabled={creating}
+                    size={Math.min(users.filter((u) => u.email.toLowerCase().includes(searchUser.toLowerCase())).length + 1, 5)}
+                  >
+                    <option value="" className="text-gray-500">✨ Select user to add</option>
+                    {users
+                      .filter((u) => u.email.toLowerCase().includes(searchUser.toLowerCase()))
+                      .filter((u) => !form.userEmails.includes(u.email))
+                      .map((user) => (
+                        <option key={user.id} value={user.email} className="py-2">
+                          👤 {user.email}
+                        </option>
+                      ))}
+                  </select>
+                )}
+                {searchUser && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-blue-700 bg-blue-100 px-3 py-1.5 rounded-lg w-fit">
+                    <span className="font-semibold">
+                      {users.filter((u) => u.email.toLowerCase().includes(searchUser.toLowerCase())).length}
+                    </span>
+                    <span>user(s) found</span>
+                  </div>
+                )}
               </div>
 
               <Button type="submit" loading={creating} loadingText="Creating..." icon={Plus}>

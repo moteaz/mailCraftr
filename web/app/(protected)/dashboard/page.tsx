@@ -1,22 +1,45 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { apiClient } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { Users, FolderOpen } from "lucide-react";
+import type { User, Project } from "@/lib/api/types";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [userCount, setUserCount] = useState(0);
+  const [projectCount, setProjectCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [users, projects] = await Promise.all([
+          apiClient.get<User[]>(API_ENDPOINTS.USER.LIST),
+          apiClient.get<Project[]>(API_ENDPOINTS.PROJECT.LIST),
+        ]);
+        setUserCount(users.length);
+        setProjectCount(projects.length);
+      } catch (err) {
+        console.error('Failed to fetch counts:', err);
+      }
+    };
+
+    fetchCounts();
+  }, []);
 
   const stats = [
     {
       icon: Users,
       label: "Total Users",
-      value: "24",
+      value: userCount.toString(),
       color: "from-blue-500 to-indigo-500",
     },
     {
       icon: FolderOpen,
-      label: "Categories",
-      value: "12",
+      label: "Projects",
+      value: projectCount.toString(),
       color: "from-purple-500 to-pink-500",
     },
   ];
@@ -25,7 +48,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {user?.email?.split("@")[0]}!
+          Welcome back, {user?.email?.split("@")[0]} !
         </h1>
         <p className="text-gray-600">
           Here's what's happening with your projects today.

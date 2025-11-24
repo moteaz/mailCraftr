@@ -1,25 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Mail, Lock, UserPlus, Users as UsersIcon, X, Trash2, User } from 'lucide-react';
+import { Mail, Lock, UserPlus, Users as UsersIcon, X, Trash2, User, FolderOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { validators, validationMessages } from '@/lib/utils/validators';
+import { useDataStore } from '@/store/data-store';
 import { toast } from 'sonner';
 import type { User, ApiError } from '@/lib/api/types';
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const { users, setUsers, projects, setProjects } = useDataStore();
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '', projectIds: [] as string[] });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [creating, setCreating] = useState(false);
   const [deleteUserModal, setDeleteUserModal] = useState<number | null>(null);
   const [deletingUser, setDeletingUser] = useState(false);
+  const [searchProject, setSearchProject] = useState('');
 
   const fetchUsers = async () => {
     try {
@@ -35,7 +37,18 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
+    fetchProjects();
   }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const data = await apiClient.get(API_ENDPOINTS.PROJECT.LIST);
+      console.log('Fetched projects:', data);
+      setProjects(data);
+    } catch (err) {
+      console.error('Failed to fetch projects:', err);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,9 +83,16 @@ export default function UsersPage() {
 
     setCreating(true);
     try {
-      await apiClient.post(API_ENDPOINTS.USER.CREATE, form);
+      const userData = { email: form.email, password: form.password };
+      await apiClient.post(API_ENDPOINTS.USER.CREATE, userData);
+      
+      for (const projectId of form.projectIds) {
+        await apiClient.post(`/project/${projectId}/add-user`, { email: form.email });
+      }
+      
       toast.success('User created successfully!');
-      setForm({ email: '', password: '' });
+      setForm({ email: '', password: '', projectIds: [] });
+      setSearchProject('');
       setIsModalOpen(false);
       fetchUsers();
     } catch (err) {
@@ -249,6 +269,87 @@ export default function UsersPage() {
                 error={errors.password}
                 disabled={creating}
               />
+
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-xl border border-purple-100">
+                <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <FolderOpen className="w-4 h-4 text-purple-600" />
+                  Assign to Project (Optional)
+                </label>
+                <div className="relative mb-3">
+                  <input
+                    type="text"
+                    placeholder="🔍 Search projects..."
+                    value={searchProject}
+                    onChange={(e) => setSearchProject(e.target.value)}
+                    className="block w-full px-4 py-2.5 border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white shadow-sm"
+                    disabled={creating}
+                  />
+                  {searchProject && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchProject('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {form.projectIds.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {form.projectIds.map((projectId) => {
+                      const project = projects.find((p) => p.id.toString() === projectId);
+                      return (
+                        <div key={projectId} className="flex items-center gap-2 bg-white border-2 border-purple-300 rounded-lg px-3 py-2 shadow-sm">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                            <FolderOpen className="w-3 h-3 text-white" />
+                          </div>
+                          <span className="font-medium text-sm text-gray-800">{project?.title}</span>
+                          <button
+                            type="button"
+                            onClick={() => setForm({ ...form, projectIds: form.projectIds.filter(id => id !== projectId) })}
+                            className="p-1 hover:bg-red-50 text-red-600 rounded transition-colors"
+                            disabled={creating}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {searchProject && (
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value && !form.projectIds.includes(e.target.value)) {
+                        setForm({ ...form, projectIds: [...form.projectIds, e.target.value] });
+                        setSearchProject('');
+                      }
+                    }}
+                    className="block w-full px-4 py-2.5 border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 transition-all bg-white shadow-sm font-medium text-gray-700"
+                    disabled={creating}
+                    size={Math.min(projects.filter((p) => p.title.toLowerCase().includes(searchProject.toLowerCase())).length + 1, 5)}
+                  >
+                    <option value="" className="text-gray-500">✨ Select project to add</option>
+                    {projects
+                      .filter((p) => p.title.toLowerCase().includes(searchProject.toLowerCase()))
+                      .filter((p) => !form.projectIds.includes(p.id.toString()))
+                      .map((project) => (
+                        <option key={project.id} value={project.id} className="py-2">
+                          📁 {project.title}
+                        </option>
+                      ))}
+                  </select>
+                )}
+                {searchProject && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-purple-700 bg-purple-100 px-3 py-1.5 rounded-lg w-fit">
+                    <span className="font-semibold">
+                      {projects.filter((p) => p.title.toLowerCase().includes(searchProject.toLowerCase())).length}
+                    </span>
+                    <span>project(s) found</span>
+                  </div>
+                )}
+              </div>
 
               <Button type="submit" loading={creating} loadingText="Creating..." icon={UserPlus}>
                 Create User
