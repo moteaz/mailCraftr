@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import type { Project, ApiError } from '@/lib/api/types';
 
 export default function ProjectsListPage() {
-  const { projects, setProjects, users } = useDataStore();
+  const { projects, users, fetchProjects, fetchUsers, refetchProjects } = useDataStore();
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', userEmails: [] as string[] });
@@ -27,21 +27,19 @@ export default function ProjectsListPage() {
   const [deleteProjectModal, setDeleteProjectModal] = useState<number | null>(null);
   const [deletingProject, setDeletingProject] = useState(false);
 
-  const fetchProjects = async () => {
-    try {
-      const data = await apiClient.get<Project[]>(API_ENDPOINTS.PROJECT.LIST);
-      setProjects(data);
-    } catch (err) {
-      const error = err as ApiError;
-      toast.error(error.message || 'Failed to load projects');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    const loadData = async () => {
+      try {
+        await Promise.all([fetchProjects(), fetchUsers()]);
+      } catch (err) {
+        const error = err as ApiError;
+        toast.error(error.message || 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [fetchProjects, fetchUsers]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +62,7 @@ export default function ProjectsListPage() {
       setForm({ title: '', description: '', userEmails: [] });
       setSearchUser('');
       setIsModalOpen(false);
-      fetchProjects();
+      await refetchProjects();
     } catch (err) {
       const error = err as ApiError;
       console.error('Error creating project:', err);
@@ -87,7 +85,7 @@ export default function ProjectsListPage() {
       toast.success('User added successfully!');
       setUserEmail('');
       setAddUserModal(null);
-      fetchProjects();
+      await refetchProjects();
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to add user');
@@ -104,7 +102,7 @@ export default function ProjectsListPage() {
       await apiClient.delete(`/project/${deleteUserModal.projectId}/delete-user`, { email: deleteUserModal.email });
       toast.success('User removed successfully!');
       setDeleteUserModal(null);
-      fetchProjects();
+      await refetchProjects();
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to remove user');
@@ -121,7 +119,7 @@ export default function ProjectsListPage() {
       await apiClient.delete(`/project/${deleteProjectModal}`);
       toast.success('Project deleted successfully!');
       setDeleteProjectModal(null);
-      fetchProjects();
+      await refetchProjects();
     } catch (err) {
       const error = err as ApiError;
       toast.error(error.message || 'Failed to delete project');

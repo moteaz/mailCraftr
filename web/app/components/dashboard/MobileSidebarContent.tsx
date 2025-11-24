@@ -28,7 +28,7 @@ export default function MobileSidebarContent({
         onClick={() => handleNavigation("/dashboard/users/create")}
         className="w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 text-gray-700 font-medium"
       >
-        Create User
+        User Management
       </button>
        )}
 
