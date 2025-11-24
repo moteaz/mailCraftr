@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { PrismaModule } from '../../../prisma/prisma.module';
+import { UserRepository } from '../../common/repositories/user.repository';
 
 @Module({
   imports: [PrismaModule],
   controllers: [UserController],
-  providers: [UserService], // REMOVED global APP_GUARD registration
+  providers: [UserService, UserRepository],
   exports: [UserService],
 })
 export class UserModule {}

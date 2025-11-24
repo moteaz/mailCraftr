@@ -1,14 +1,15 @@
-// dto/user.dto.ts
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MaxLength, IsOptional } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(25)
+  @MaxLength(100)
   title: string;
 
+  @IsOptional()
   @IsString()
-  description: string;
+  @MaxLength(500)
+  description?: string;
 }
 
 export class AddUserToProjectDto {

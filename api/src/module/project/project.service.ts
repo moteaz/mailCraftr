@@ -8,150 +8,107 @@ import {
   AddUserToProjectDto,
   DeletUserfromProjectDto,
 } from './dto/project.dto';
-import { PrismaService } from 'prisma/prisma.service';
+import { ProjectRepository } from '../../common/repositories/project.repository';
+import { UserRepository } from '../../common/repositories/user.repository';
 
 @Injectable()
 export class ProjectService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly projectRepository: ProjectRepository,
+    private readonly userRepository: UserRepository,
+  ) {}
 
   async create(dto: CreateProjectDto, userId: number) {
-    const existingProject = await this.prisma.project.findUnique({
-      where: { title: dto.title },
-    });
+    const existingProject = await this.projectRepository.findByTitle(dto.title);
 
     if (existingProject) {
-      throw new ConflictException('Project already in use');
+      throw new ConflictException('Project title already in use');
     }
 
-    const project = await this.prisma.project.create({
-      data: {
-        title: dto.title,
-        description: dto.description,
-        ownerId: userId,
-      },
+    const project = await this.projectRepository.create({
+      title: dto.title,
+      description: dto.description,
+      ownerId: userId,
     });
 
     return {
       message: 'Project created successfully',
-      project: {
-        id: project.id,
-        title: project.title,
-        description: project.description,
-        ownerId: project.ownerId,
-        createdAt: project.createdAt,
-      },
+      project,
     };
   }
 
   async DeleteProject(ProjectId: number) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: ProjectId },
-    });
+    const project = await this.projectRepository.findById(ProjectId);
+    
     if (!project) {
       throw new NotFoundException('Project not found');
     }
+
     try {
-      await this.prisma.project.delete({
-        where: { id: ProjectId },
-      });
+      await this.projectRepository.delete(ProjectId);
     } catch (err) {
       throw new ConflictException(
         'Cannot delete project with associated users or data',
       );
     }
+
     return { message: 'Project deleted successfully', project };
   }
 
   async AddUserToProject(dto: AddUserToProjectDto, ProjectId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const user = await this.userRepository.findByEmail(dto.email);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    if (!user) throw new NotFoundException('User not found');
+    const project = await this.projectRepository.findById(ProjectId);
+    
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
 
-    // Check project exists
-    const project = await this.prisma.project.findUnique({
-      where: { id: ProjectId },
-    });
-    if (!project) throw new NotFoundException('Project not found');
-
-    const isInProject = await this.prisma.project.findFirst({
-      where: {
-        id: ProjectId,
-        users: {
-          some: { id: user.id }, // <--- checks if user is already connected
-        },
-      },
-    });
+    const isInProject = await this.projectRepository.isUserInProject(
+      ProjectId,
+      dto.email,
+    );
 
     if (isInProject) {
       throw new ConflictException('User already in Project');
     }
-    // Add user to project
-    return this.prisma.project.update({
-      where: { id: ProjectId },
-      data: {
-        users: {
-          connect: { id: user.id },
-        },
-      },
-      include: {
-        users: true,
-      },
-    });
+
+    return this.projectRepository.addUser(ProjectId, user.id);
   }
 
-  async DeleteUserFromProject(dto: DeletUserfromProjectDto, ProjectId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+  async DeleteUserFromProject(
+    dto: DeletUserfromProjectDto,
+    ProjectId: number,
+  ) {
+    const user = await this.userRepository.findByEmail(dto.email);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    if (!user) throw new NotFoundException('User not found');
+    const project = await this.projectRepository.findById(ProjectId);
+    
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
 
-    // Check project exists
-    const project = await this.prisma.project.findUnique({
-      where: { id: ProjectId },
-    });
-
-    if (!project) throw new NotFoundException('Project not found');
-    const isInProject = await this.prisma.project.findFirst({
-      where: {
-        id: ProjectId,
-        users: {
-          some: { id: user.id }, // <--- checks if user is already connected
-        },
-      },
-    });
+    const isInProject = await this.projectRepository.isUserInProject(
+      ProjectId,
+      dto.email,
+    );
 
     if (!isInProject) {
       throw new ConflictException('User is not part of this project');
     }
 
-    // Delet user to project
-    return this.prisma.project.update({
-      where: { id: ProjectId },
-      data: {
-        users: {
-          disconnect: { id: user.id },
-        },
-      },
-      include: {
-        users: true,
-      },
-    });
+    return this.projectRepository.removeUser(ProjectId, user.id);
   }
 
   async getAllProjects() {
-    const projects = await this.prisma.project.findMany({
-      include: {
-        users: {
-          select: {
-            id: true,
-            email: true,
-          },
-        },
-      },
-    });
-    return projects;
+    return this.projectRepository.findAll();
   }
 }
