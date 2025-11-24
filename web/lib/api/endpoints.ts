@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
   },
   USER: {
     CREATE: "/user",
+    LIST: "/user",
   },
   PROJECT: {
     LIST: "/project",
