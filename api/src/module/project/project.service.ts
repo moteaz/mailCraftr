@@ -43,6 +43,25 @@ export class ProjectService {
     };
   }
 
+  async DeleteProject(ProjectId: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: ProjectId },
+    });
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+    try {
+      await this.prisma.project.delete({
+        where: { id: ProjectId },
+      });
+    } catch (err) {
+      throw new ConflictException(
+        'Cannot delete project with associated users or data',
+      );
+    }
+    return { message: 'Project deleted successfully', project };
+  }
+
   async AddUserToProject(dto: AddUserToProjectDto, ProjectId: number) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -120,5 +139,19 @@ export class ProjectService {
         users: true,
       },
     });
+  }
+
+  async getAllProjects() {
+    const projects = await this.prisma.project.findMany({
+      include: {
+        users: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+    return projects;
   }
 }

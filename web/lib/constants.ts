@@ -5,7 +5,8 @@ export const ROUTES = {
   LOGIN: '/login',
   DASHBOARD: '/dashboard',
   USERS_CREATE: '/dashboard/users/create',
-  CATEGORIES_CREATE: '/dashboard/categories/create',
+  PROJECTS_LIST: '/dashboard/projects',
+  PROJECTS_CREATE: '/dashboard/projects/create',
 } as const;
 
 export const STORAGE_KEYS = {

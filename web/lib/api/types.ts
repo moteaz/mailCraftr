@@ -21,6 +21,15 @@ export interface CreateUserRequest {
   password: string;
 }
 
+export interface Project {
+  id: number;
+  title: string;
+  description: string;
+  ownerId: number;
+  createdAt: string;
+  users: any[];
+}
+
 export interface ApiError {
   message: string;
   statusCode?: number;

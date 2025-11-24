@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { UserPlus, FolderPlus, LogOut, LayoutDashboard } from 'lucide-react';
+import { UserPlus, FolderPlus, LogOut, LayoutDashboard, FolderOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { ROUTES } from '@/lib/constants';
 import { cn } from '@/lib/utils/cn';
@@ -24,7 +24,7 @@ export function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: ROUTES.DASHBOARD },
     ...(user?.role === 'SUPERADMIN' ? [{ icon: UserPlus, label: 'Create User', path: ROUTES.USERS_CREATE }] : []),
-    { icon: FolderPlus, label: 'Create Category', path: ROUTES.CATEGORIES_CREATE },
+    { icon: FolderOpen, label: 'Projects', path: ROUTES.PROJECTS_LIST },
   ];
 
   return (

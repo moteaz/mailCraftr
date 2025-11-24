@@ -1,0 +1,396 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { FolderOpen, Calendar, User, Plus, X, Users, UserPlus, Trash2 } from 'lucide-react';
+import { apiClient } from '@/lib/api/client';
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
+import { Spinner } from '@/components/ui/spinner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import type { Project, ApiError } from '@/lib/api/types';
+
+export default function ProjectsListPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form, setForm] = useState({ title: '', description: '' });
+  const [creating, setCreating] = useState(false);
+  const [expandedProject, setExpandedProject] = useState<number | null>(null);
+  const [addUserModal, setAddUserModal] = useState<number | null>(null);
+  const [userEmail, setUserEmail] = useState('');
+  const [addingUser, setAddingUser] = useState(false);
+  const [deleteUserModal, setDeleteUserModal] = useState<{ projectId: number; email: string } | null>(null);
+  const [deletingUser, setDeletingUser] = useState(false);
+  const [deleteProjectModal, setDeleteProjectModal] = useState<number | null>(null);
+  const [deletingProject, setDeletingProject] = useState(false);
+
+  const fetchProjects = async () => {
+    try {
+      const data = await apiClient.get<Project[]>(API_ENDPOINTS.PROJECT.LIST);
+      setProjects(data);
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(error.message || 'Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.title.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      await apiClient.post(API_ENDPOINTS.PROJECT.LIST, form);
+      toast.success('Project created successfully!');
+      setForm({ title: '', description: '' });
+      setIsModalOpen(false);
+      fetchProjects();
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(error.message || 'Failed to create project');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleAddUser = async (e: React.FormEvent, projectId: number) => {
+    e.preventDefault();
+    if (!userEmail.trim()) {
+      toast.error('Email is required');
+      return;
+    }
+
+    setAddingUser(true);
+    try {
+      await apiClient.post(`/project/${projectId}/add-user`, { email: userEmail });
+      toast.success('User added successfully!');
+      setUserEmail('');
+      setAddUserModal(null);
+      fetchProjects();
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(error.message || 'Failed to add user');
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteUserModal) return;
+
+    setDeletingUser(true);
+    try {
+      await apiClient.delete(`/project/${deleteUserModal.projectId}/add-user`, {
+        body: JSON.stringify({ email: deleteUserModal.email }),
+      });
+      toast.success('User removed successfully!');
+      setDeleteUserModal(null);
+      fetchProjects();
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(error.message || 'Failed to remove user');
+    } finally {
+      setDeletingUser(false);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!deleteProjectModal) return;
+
+    setDeletingProject(true);
+    try {
+      await apiClient.delete(`/project/${deleteProjectModal}`);
+      toast.success('Project deleted successfully!');
+      setDeleteProjectModal(null);
+      fetchProjects();
+    } catch (err) {
+      const error = err as ApiError;
+      toast.error(error.message || 'Failed to delete project');
+    } finally {
+      setDeletingProject(false);
+    }
+  };
+
+  if (loading) {
+    return <Spinner />;
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
+              <FolderOpen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
+              <p className="text-gray-600">Manage your projects</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+          >
+            <Plus className="w-5 h-5" />
+            New Project
+          </button>
+        </div>
+
+        {projects.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No projects found</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {projects.map((project) => (
+              <div
+                key={project.id}
+                className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {project.title}
+                  </h3>
+                  <button
+                    onClick={() => setDeleteProjectModal(project.id)}
+                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                  >
+                    <Trash2 className="w-6 h-6"/>
+                  </button>
+                </div>
+                <p className="text-gray-600 mb-4">{project.description}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6 text-sm text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      <span>Owner ID: {project.ownerId}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setExpandedProject(expandedProject === project.id ? null : project.id)}
+                    className="flex items-center gap-2 px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                  >
+                    <Users className="w-4 h-4" />
+                    {project.users.length} Users
+                  </button>
+                </div>
+                {expandedProject === project.id && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-semibold text-gray-900">Project Users:</h4>
+                      <button
+                        onClick={() => setAddUserModal(project.id)}
+                        className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                      >
+                        <UserPlus className="w-3 h-3" />
+                        Add User
+                      </button>
+                    </div>
+                    {project.users.length === 0 ? (
+                      <p className="text-sm text-gray-500">No users assigned</p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {project.users.map((user: any, idx: number) => (
+                          <li key={idx} className="text-sm text-gray-600 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <User className="w-3 h-3" />
+                              {user.email || user}
+                            </div>
+                            <button
+                              onClick={() => setDeleteUserModal({ projectId: project.id, email: user.email || user })}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {deleteProjectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Delete Project</h2>
+              <button
+                onClick={() => setDeleteProjectModal(null)}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this project? This action cannot be undone.
+            </p>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setDeleteProjectModal(null)}
+                variant="secondary"
+                className="flex-1"
+                disabled={deletingProject}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteProject}
+                variant="danger"
+                loading={deletingProject}
+                loadingText="Deleting..."
+                icon={Trash2}
+                className="flex-1"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteUserModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Remove User</h2>
+              <button
+                onClick={() => setDeleteUserModal(null)}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to remove <strong>{deleteUserModal.email}</strong> from this project?
+            </p>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setDeleteUserModal(null)}
+                variant="secondary"
+                className="flex-1"
+                disabled={deletingUser}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteUser}
+                variant="danger"
+                loading={deletingUser}
+                loadingText="Removing..."
+                icon={Trash2}
+                className="flex-1"
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {addUserModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Add User to Project</h2>
+              <button
+                onClick={() => {
+                  setAddUserModal(null);
+                  setUserEmail('');
+                }}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => handleAddUser(e, addUserModal)} className="space-y-4">
+              <Input
+                label="User Email"
+                name="email"
+                type="email"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                placeholder="user@example.com"
+                disabled={addingUser}
+              />
+
+              <Button type="submit" loading={addingUser} loadingText="Adding..." icon={UserPlus}>
+                Add User
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Create New Project</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreate} className="space-y-4">
+              <Input
+                label="Title"
+                name="title"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="Project title"
+                disabled={creating}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Project description"
+                  disabled={creating}
+                  rows={4}
+                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+                />
+              </div>
+
+              <Button type="submit" loading={creating} loadingText="Creating..." icon={Plus}>
+                Create Project
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

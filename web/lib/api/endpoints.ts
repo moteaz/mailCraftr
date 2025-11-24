@@ -1,8 +1,12 @@
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/login',
+    LOGIN: "/auth/login",
   },
   USER: {
-    CREATE: '/user',
+    CREATE: "/user",
+  },
+  PROJECT: {
+    LIST: "/project",
+    CREATE: "/project",
   },
 } as const;
