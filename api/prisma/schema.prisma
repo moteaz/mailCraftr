@@ -8,15 +8,38 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
   password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
+  role      Role       @default(USER)
 
-  // OPTIONAL: Protect superadmin from deletion (app-level)
+  // Back-relation: all projects created by this user (admin)
+  ownedProjects Project[] @relation("UserOwnedProjects")
+
+  // Many-to-many projects membership
+  projects  Project[] @relation("UserProjects")
+
+  createdAt DateTime   @default(now())
   @@index([role])
 }
+
+model Project {
+  id          Int       @id @default(autoincrement())
+  title       String    @unique
+  description String?
+
+  ownerId     Int
+
+  owner       User      @relation("UserOwnedProjects", fields: [ownerId], references: [id])
+
+  // Many-to-many
+  users       User[]    @relation("UserProjects")
+
+  createdAt   DateTime  @default(now())
+}
+
+
+// Many-to-Many pivot table created automatically by Prisma
 
 enum Role {
   SUPERADMIN
