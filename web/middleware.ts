@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_ROUTES = ['/login'];
-const PROTECTED_ROUTES = ['/dashboard'];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('accessToken')?.value;
 
-  const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  const isProtectedRoute = pathname.startsWith('/dashboard');
 
   if (isProtectedRoute && !token) {
     const loginUrl = new URL('/login', request.url);

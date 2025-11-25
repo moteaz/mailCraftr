@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FileText, Calendar, User, Plus, X, Trash2, Edit2, FolderOpen } from 'lucide-react';
+import { FileText, Calendar, Plus, X, Trash2, Edit2, FolderOpen } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { Spinner } from '@/components/ui/spinner';
@@ -78,7 +78,7 @@ export default function CategoriesPage() {
 
     setUpdating(true);
     try {
-      const updated = await apiClient.Patch(API_ENDPOINTS.CATEGORY.UPDATE(editModal.id), {
+      const updated = await apiClient.patch(API_ENDPOINTS.CATEGORY.UPDATE(editModal.id), {
         name: form.name,
         description: form.description,
       });

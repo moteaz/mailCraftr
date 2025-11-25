@@ -4,7 +4,7 @@ import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { session } from '@/lib/auth/session';
 import { ROUTES } from '@/lib/constants';
-import type { LoginRequest, LoginResponse, CreateUserRequest } from '@/lib/api/types';
+import type { LoginRequest, LoginResponse } from '@/lib/api/types';
 
 export function useAuth() {
   const router = useRouter();
@@ -25,15 +25,10 @@ export function useAuth() {
     router.push(ROUTES.LOGIN);
   };
 
-  const createUser = async (userData: CreateUserRequest) => {
-    return apiClient.post(API_ENDPOINTS.USER.CREATE, userData);
-  };
-
   return {
     user,
     isAuthenticated,
     login,
     logout,
-    createUser,
   };
 }

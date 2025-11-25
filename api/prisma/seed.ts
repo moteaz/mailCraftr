@@ -36,7 +36,7 @@ async function main() {
 
   console.log('🔐 Creating initial SuperAdmin user...');
 
-  const saltRounds = 12; // more secure than 10
+  const saltRounds = 12;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   await prisma.user.create({

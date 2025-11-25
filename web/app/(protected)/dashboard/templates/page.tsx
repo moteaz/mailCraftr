@@ -26,6 +26,7 @@ export default function TemplatesPage() {
     categorieId: '',
     placeholders: [] as { key: string; value: string }[],
   });
+  const [jsonFile, setJsonFile] = useState<File | null>(null);
   const [editContent, setEditContent] = useState('');
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -43,7 +44,13 @@ export default function TemplatesPage() {
           apiClient.get<Template[]>(API_ENDPOINTS.TEMPLATE.MY_TEMPLATES),
           apiClient.get<Category[]>(API_ENDPOINTS.CATEGORY.MY_CATEGORIES),
         ]);
-        setTemplates(templatesRes);
+        const parsedTemplates = templatesRes.map(t => ({
+          ...t,
+          placeholders: typeof t.placeholders === 'string' 
+            ? JSON.parse(t.placeholders) 
+            : Array.isArray(t.placeholders) ? t.placeholders : []
+        }));
+        setTemplates(parsedTemplates);
         setCategories(categoriesRes);
       } catch (err) {
         const error = err as ApiError;
@@ -66,13 +73,15 @@ export default function TemplatesPage() {
     try {
       const validPlaceholders = form.placeholders.filter(p => p.key.trim() !== '');
       
-      const response: any = await apiClient.post(API_ENDPOINTS.TEMPLATE.CREATE, {
+      const payload = {
         name: form.name,
         description: form.description,
         content: '',
         categorieId: parseInt(form.categorieId),
         placeholders: validPlaceholders,
-      });
+      };
+      
+      const response: any = await apiClient.post(API_ENDPOINTS.TEMPLATE.CREATE, payload);
       toast.success('Template created! Now add content.');
       const newTemplate = {
         ...response.template,
@@ -99,10 +108,15 @@ export default function TemplatesPage() {
 
     setUpdating(true);
     try {
-      const response: any = await apiClient.Patch(API_ENDPOINTS.TEMPLATE.UPDATE(editModal.id), {
+      const response: any = await apiClient.patch(API_ENDPOINTS.TEMPLATE.UPDATE(editModal.id), {
         content: editContent,
+        placeholders: editModal.placeholders,
       });
-      setTemplates(templates.map((t) => (t.id === editModal.id ? response : t)));
+      const updatedTemplate = {
+        ...response,
+        placeholders: editModal.placeholders,
+      };
+      setTemplates(templates.map((t) => (t.id === editModal.id ? updatedTemplate : t)));
       toast.success('Template updated successfully!');
       setEditModal(null);
       setEditContent('');
@@ -175,25 +189,42 @@ export default function TemplatesPage() {
     }
   };
 
-  const addPlaceholder = () => {
-    setForm({ ...form, placeholders: [...form.placeholders, { key: '', value: '' }] });
-  };
+  const handleJsonUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const removePlaceholder = (index: number) => {
-    setForm({ ...form, placeholders: form.placeholders.filter((_, i) => i !== index) });
-  };
+    if (!file.name.endsWith('.json')) {
+      toast.error('Please upload a valid JSON file');
+      return;
+    }
 
-  const updatePlaceholder = (index: number, field: 'key' | 'value', value: string) => {
-    const updated = [...form.placeholders];
-    updated[index][field] = value;
-    setForm({ ...form, placeholders: updated });
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        const placeholders = Object.entries(json).map(([key, value]) => ({
+          key,
+          value: String(value),
+        }));
+        setForm({ ...form, placeholders });
+        setJsonFile(file);
+        toast.success(`Loaded ${placeholders.length} placeholders from JSON`);
+      } catch (err) {
+        toast.error('Invalid JSON file format');
+      }
+    };
+    reader.readAsText(file);
   };
 
   const replacePlaceholders = (content: string, placeholders: { key: string; value: string }[]) => {
     let result = content;
-    placeholders.forEach((p) => {
-      result = result.replace(new RegExp(`{{${p.key}}}`, 'g'), p.value);
-    });
+    if (Array.isArray(placeholders) && placeholders.length > 0) {
+      placeholders.forEach((p) => {
+        if (p && p.key && p.value) {
+          result = result.replace(new RegExp(`{{${p.key}}}`, 'g'), p.value);
+        }
+      });
+    }
     return result;
   };
 
@@ -247,9 +278,22 @@ export default function TemplatesPage() {
                 key={template.id}
                 className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => {
+                  let placeholders = [];
+                  if (typeof template.placeholders === 'string') {
+                    try {
+                      const parsed = JSON.parse(template.placeholders);
+                      placeholders = Array.isArray(parsed) ? parsed : [];
+                    } catch (e) {
+                      placeholders = [];
+                    }
+                  } else if (Array.isArray(template.placeholders)) {
+                    placeholders = template.placeholders;
+                  }
+                  placeholders = placeholders.filter(p => p && p.key && p.value);
+                  
                   setEditModal({
                     ...template,
-                    placeholders: Array.isArray(template.placeholders) ? template.placeholders : [],
+                    placeholders,
                   });
                   setEditContent(template.content || '<p></p>');
                 }}
@@ -276,7 +320,7 @@ export default function TemplatesPage() {
                     <FileText className="w-4 h-4" />
                     <span>{template.categorie?.name || 'Unknown Category'}</span>
                   </div>
-                  {template.placeholders.length > 0 && (
+                  {Array.isArray(template.placeholders) && template.placeholders.length > 0 && (
                     <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
                       {template.placeholders.length} placeholders
                     </span>
@@ -341,41 +385,29 @@ export default function TemplatesPage() {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">Placeholders</label>
-                  <button
-                    type="button"
-                    onClick={addPlaceholder}
-                    className="text-sm text-orange-600 hover:text-orange-700"
-                  >
-                    + Add Placeholder
-                  </button>
-                </div>
-                {form.placeholders.map((p, i) => (
-                  <div key={i} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      placeholder="Key (e.g., name)"
-                      value={p.key}
-                      onChange={(e) => updatePlaceholder(i, 'key', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Default value"
-                      value={p.value}
-                      onChange={(e) => updatePlaceholder(i, 'value', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removePlaceholder(i)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders (JSON File)</label>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleJsonUpload}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                  disabled={creating}
+                />
+                {form.placeholders.length > 0 && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Loaded Placeholders:</p>
+                    <div className="space-y-1">
+                      {form.placeholders.map((p, i) => (
+                        <div key={i} className="text-xs text-gray-600 font-mono">
+                          {`{{${p.key}}}`} = {p.value}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                )}
+                <p className="text-xs text-gray-500 mt-2">
+                  Upload a JSON file with key-value pairs (e.g., {`{"name": "John", "email": "john@example.com"}`})
+                </p>
               </div>
 
               <Button type="submit" loading={creating} loadingText="Creating..." icon={Plus}>
@@ -420,7 +452,7 @@ export default function TemplatesPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders</label>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {editModal.placeholders.length === 0 ? (
+                  {!editModal.placeholders || editModal.placeholders.length === 0 ? (
                     <p className="text-sm text-gray-500">No placeholders defined</p>
                   ) : (
                     editModal.placeholders.map((p, i) => (
@@ -433,7 +465,7 @@ export default function TemplatesPage() {
                         <div className="font-mono text-sm text-orange-700 font-semibold group-hover:text-orange-800">
                           {`{{${p.key}}}`}
                         </div>
-                        <div className="text-xs text-gray-600 mt-1">{p.value}</div>
+                        <div className="text-xs text-gray-600 mt-1">{p.value || 'No default value'}</div>
                         <div className="text-xs text-orange-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           Click to insert
                         </div>

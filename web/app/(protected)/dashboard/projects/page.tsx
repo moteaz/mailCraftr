@@ -10,7 +10,7 @@ import {
   X,
   Trash2,
   UserPlus,
-} from "lucide-react";
+} from 'lucide-react';
 import { apiClient } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { Spinner } from "@/components/ui/spinner";

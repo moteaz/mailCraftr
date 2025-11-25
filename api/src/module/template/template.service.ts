@@ -33,20 +33,36 @@ export class TemplateService {
       throw new ConflictException('Template name already exists in this category');
     }
 
-    const placeholdersArray = Array.isArray(dto.placeholders) ? dto.placeholders : [];
+    let placeholdersArray: any[] = Array.isArray(dto.placeholders) ? dto.placeholders : [];
+    placeholdersArray = placeholdersArray.map((p: any) => {
+      if (typeof p === 'object' && p !== null && 'key' in p && 'value' in p) {
+        return { key: String(p.key), value: String(p.value) };
+      }
+      if (Array.isArray(p) && (p as any[]).length >= 2) {
+        return { key: String(p[0]), value: String(p[1]) };
+      }
+      return null;
+    }).filter((p: any) => p !== null);
+    
+    const placeholdersString = JSON.stringify(placeholdersArray);
     
     const template = await this.templateRepository.create({
       name: dto.name,
       description: dto.description,
       content: dto.content || '',
-      placeholders: JSON.stringify(placeholdersArray),
+      placeholders: placeholdersString,
       categorieId: dto.categorieId,
     });
 
     return {
       message: 'Template created successfully',
       template: {
-        ...template,
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        content: template.content,
+        categorieId: template.categorieId,
+        createdAt: template.createdAt,
         placeholders: placeholdersArray,
       },
     };
@@ -54,10 +70,15 @@ export class TemplateService {
 
   async findMyTemplates(userId: number) {
     const templates = await this.templateRepository.findByUser(userId);
-    return templates.map((t) => ({
-      ...t,
-      placeholders: JSON.parse(t.placeholders),
-    }));
+    return templates.map((t) => {
+      console.log(`📤 Sending template "${t.name}" with placeholders:`, t.placeholders);
+      const parsed = t.placeholders ? JSON.parse(t.placeholders) : [];
+      console.log('📤 Parsed:', parsed);
+      return {
+        ...t,
+        placeholders: parsed,
+      };
+    });
   }
 
   async findOne(id: number, userId: number) {
@@ -73,7 +94,7 @@ export class TemplateService {
 
     return {
       ...template,
-      placeholders: JSON.parse(template.placeholders),
+      placeholders: template.placeholders ? JSON.parse(template.placeholders) : [],
     };
   }
 
@@ -105,7 +126,7 @@ export class TemplateService {
 
     return {
       ...updated,
-      placeholders: JSON.parse(updated.placeholders),
+      placeholders: updated.placeholders ? JSON.parse(updated.placeholders) : [],
     };
   }
 

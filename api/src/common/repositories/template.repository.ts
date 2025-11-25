@@ -76,7 +76,10 @@ export class TemplateRepository {
     categorieId: number;
   }) {
     return this.prisma.template.create({
-      data,
+      data: {
+        ...data,
+        content: data.content || '',
+      },
       select: {
         id: true,
         name: true,
