@@ -7,6 +7,7 @@ export const ROUTES = {
   USERS_CREATE: '/dashboard/users/create',
   PROJECTS_LIST: '/dashboard/projects',
   PROJECTS_CREATE: '/dashboard/projects/create',
+  CATEGORIES_LIST: '/dashboard/categories',
 } as const;
 
 export const STORAGE_KEYS = {
