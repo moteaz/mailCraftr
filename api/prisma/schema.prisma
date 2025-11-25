@@ -52,10 +52,12 @@ model Categorie {
 }
 
 model Template {
-  id          Int    @id @default(autoincrement())
-  name        String
-  content     String
-  categorieId Int
+  id           Int     @id @default(autoincrement())
+  name         String
+  description  String?
+  content      String
+  placeholders String  @default("[]")
+  categorieId  Int
 
   categorie Categorie @relation(fields: [categorieId], references: [id], onDelete: Cascade)
 

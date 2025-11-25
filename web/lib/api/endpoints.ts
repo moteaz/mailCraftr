@@ -20,4 +20,11 @@ export const API_ENDPOINTS = {
     UPDATE: (id: number) => `/categories/${id}`,
     DELETE: (id: number) => `/categories/${id}`,
   },
+  TEMPLATE: {
+    CREATE: "/templates",
+    MY_TEMPLATES: "/templates/my-templates",
+    BY_ID: (id: number) => `/templates/${id}`,
+    UPDATE: (id: number) => `/templates/${id}`,
+    DELETE: (id: number) => `/templates/${id}`,
+  },
 } as const;
