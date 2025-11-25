@@ -16,11 +16,6 @@ export interface LoginResponse {
   user: User;
 }
 
-export interface CreateUserRequest {
-  email: string;
-  password: string;
-}
-
 export interface Project {
   id: number;
   title: string;

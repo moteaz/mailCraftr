@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Mail, Lock, UserPlus, Users as UsersIcon, X, Trash2, User, FolderOpen } from 'lucide-react';
+import { Mail, Lock, UserPlus, Users as UsersIcon, X, Trash2, FolderOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';

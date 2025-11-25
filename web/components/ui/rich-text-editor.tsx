@@ -16,9 +16,6 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
-  if (typeof window === 'undefined') {
-    return null;
-  }
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -39,8 +36,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     immediatelyRender: false,
   });
 
-  // Expose editor instance for external use
-  if (editor && typeof window !== 'undefined') {
+  if (editor) {
     (window as any).__tiptapEditor = editor;
   }
 

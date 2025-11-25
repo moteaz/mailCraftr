@@ -12,22 +12,19 @@ export default function DashboardPage() {
   const [projectCount, setProjectCount] = useState(0);
   const [categoriesCount, setCategoriesCount] = useState(0);
   const [totalCategoriesCount, setTotalCategoriesCount] = useState(0);
-  const [myProjectsCount, setMyProjectsCount] = useState(0);
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
         if (user?.role === 'SUPERADMIN') {
-          const [usersRes, projectsRes, categoriesRes, myProjectsRes] = await Promise.all([
+          const [usersRes, projectsRes, categoriesRes] = await Promise.all([
             apiClient.get<any>(API_ENDPOINTS.USER.PAGINATED(1, 1)),
             apiClient.get<any>(API_ENDPOINTS.PROJECT.PAGINATED(1, 1)),
             apiClient.get<any>(API_ENDPOINTS.CATEGORY.MY_CATEGORIES),
-            apiClient.get<any>(API_ENDPOINTS.PROJECT.MY_PROJECTS),
           ]);
           setUserCount(usersRes.meta.total);
           setProjectCount(projectsRes.meta.total);
           setCategoriesCount(categoriesRes.length);
-          setMyProjectsCount(myProjectsRes.length);
           
           // Get total categories count
           try {

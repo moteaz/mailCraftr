@@ -15,7 +15,6 @@ export class CreateTemplateDto {
   @IsOptional()
   content: string;
 
-  @IsArray()
   @IsOptional()
   placeholders?: { key: string; value: string }[];
 
@@ -40,6 +39,5 @@ export class UpdateTemplateDto {
   content?: string;
 
   @IsOptional()
-  @IsArray()
   placeholders?: { key: string; value: string }[];
 }
