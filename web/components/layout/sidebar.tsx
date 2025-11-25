@@ -49,14 +49,14 @@ export function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed top-16 bottom-0 w-64 bg-white border-r border-gray-200 z-40 transition-transform duration-300",
+          "fixed top-14 sm:top-16 bottom-0 w-64 sm:w-72 lg:w-64 bg-white border-r border-gray-200 z-40 transition-transform duration-300 ease-in-out",
           "lg:translate-x-0",
           isMobileMenuOpen
             ? "translate-x-0"
             : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <nav className="p-4 space-y-2 h-full flex flex-col">
+        <nav className="p-3 sm:p-4 space-y-2 h-full flex flex-col overflow-y-auto">
           <div className="flex-1 space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -67,14 +67,14 @@ export function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
                   key={item.path}
                   onClick={() => navigate(item.path)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200",
+                    "w-full flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base",
                     isActive
                       ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30"
                       : "text-gray-700 hover:bg-gray-100"
                   )}
                 >
-                  <Icon className="w-5 h-5" />
-                  {item.label}
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </button>
               );
             })}
@@ -82,10 +82,10 @@ export function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
 
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-all duration-200"
+            className="w-full flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-all duration-200 text-sm sm:text-base"
           >
-            <LogOut className="w-5 h-5" />
-            Logout
+            <LogOut className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+            <span className="truncate">Logout</span>
           </button>
         </nav>
       </aside>

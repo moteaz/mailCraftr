@@ -40,11 +40,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         isMobileMenuOpen={isMobileMenuOpen} 
         onClose={() => setIsMobileMenuOpen(false)} 
       />
-      <main className="pt-16 lg:pl-64 transition-all duration-300">
-        <div className="p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+      <main className="pt-14 sm:pt-16 lg:pl-64 transition-all duration-300 min-h-screen">
+        <div className="p-4 sm:p-6 lg:p-8">
+          {children}
         </div>
       </main>
     </div>
