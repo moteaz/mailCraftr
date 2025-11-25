@@ -30,6 +30,24 @@ export interface Project {
   users: any[];
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  projectId: number;
+  createdById: number;
+  createdAt: string;
+  project?: {
+    id: number;
+    title: string;
+  };
+  createdBy?: {
+    id: number;
+    email: string;
+  };
+  templates?: any[];
+}
+
 export interface ApiError {
   message: string;
   statusCode?: number;

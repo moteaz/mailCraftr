@@ -4,31 +4,57 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import { Users, FolderOpen } from "lucide-react";
+import { Users, FolderOpen, FileText } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [userCount, setUserCount] = useState(0);
   const [projectCount, setProjectCount] = useState(0);
+  const [categoriesCount, setCategoriesCount] = useState(0);
+  const [totalCategoriesCount, setTotalCategoriesCount] = useState(0);
+  const [myProjectsCount, setMyProjectsCount] = useState(0);
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [usersRes, projectsRes] = await Promise.all([
-          apiClient.get<any>(API_ENDPOINTS.USER.PAGINATED(1, 1)),
-          apiClient.get<any>(API_ENDPOINTS.PROJECT.PAGINATED(1, 1)),
-        ]);
-        setUserCount(usersRes.meta.total);
-        setProjectCount(projectsRes.meta.total);
+        if (user?.role === 'SUPERADMIN') {
+          const [usersRes, projectsRes, categoriesRes, myProjectsRes] = await Promise.all([
+            apiClient.get<any>(API_ENDPOINTS.USER.PAGINATED(1, 1)),
+            apiClient.get<any>(API_ENDPOINTS.PROJECT.PAGINATED(1, 1)),
+            apiClient.get<any>(API_ENDPOINTS.CATEGORY.MY_CATEGORIES),
+            apiClient.get<any>(API_ENDPOINTS.PROJECT.MY_PROJECTS),
+          ]);
+          setUserCount(usersRes.meta.total);
+          setProjectCount(projectsRes.meta.total);
+          setCategoriesCount(categoriesRes.length);
+          setMyProjectsCount(myProjectsRes.length);
+          
+          // Get total categories count
+          try {
+            const allCategoriesRes = await apiClient.get<any>('/categories/all');
+            setTotalCategoriesCount(allCategoriesRes.length);
+          } catch (err) {
+            setTotalCategoriesCount(0);
+          }
+        } else {
+          const [projectsRes, categoriesRes] = await Promise.all([
+            apiClient.get<any>(API_ENDPOINTS.PROJECT.MY_PROJECTS),
+            apiClient.get<any>(API_ENDPOINTS.CATEGORY.MY_CATEGORIES),
+          ]);
+          setProjectCount(projectsRes.length);
+          setCategoriesCount(categoriesRes.length);
+        }
       } catch (err) {
         console.error('Failed to fetch counts:', err);
       }
     };
 
-    fetchCounts();
-  }, []);
+    if (user) {
+      fetchCounts();
+    }
+  }, [user]);
 
-  const stats = [
+  const stats = user?.role === 'SUPERADMIN' ? [
     {
       icon: Users,
       label: "Total Users",
@@ -37,9 +63,34 @@ export default function DashboardPage() {
     },
     {
       icon: FolderOpen,
-      label: "Projects",
+      label: "Total Projects",
       value: projectCount.toString(),
       color: "from-purple-500 to-pink-500",
+    },
+    {
+      icon: FileText,
+      label: "Total Categories",
+      value: totalCategoriesCount.toString(),
+      color: "from-teal-500 to-green-500",
+    },
+    {
+      icon: FileText,
+      label: "My Categories",
+      value: categoriesCount.toString(),
+      color: "from-green-500 to-emerald-500",
+    },
+  ] : [
+    {
+      icon: FolderOpen,
+      label: "My Projects",
+      value: projectCount.toString(),
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      icon: FileText,
+      label: "My Categories",
+      value: categoriesCount.toString(),
+      color: "from-green-500 to-teal-500",
     },
   ];
 

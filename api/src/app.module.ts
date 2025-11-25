@@ -4,6 +4,7 @@ import { UserModule } from './module/user/user.module';
 import { AuthModule } from './module/auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ProjectModule } from './module/project/project.module';
+import { CategorieModule } from './module/categorie/categorie.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -17,6 +18,7 @@ import configuration from './config/configuration';
     AuthModule,
     UserModule,
     ProjectModule,
+    CategorieModule,
   ],
   controllers: [],
   providers: [],

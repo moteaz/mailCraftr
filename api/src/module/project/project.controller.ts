@@ -38,6 +38,11 @@ export class ProjectController {
     return this.projectService.DeleteProject(ProjectId);
   }
 
+  @Get('my-projects')
+  getMyProjects(@Req() req) {
+    return this.projectService.getMyProjects(req.user.id);
+  }
+
   @Get()
   @Roles(Role.SUPERADMIN)
   getAllProjects(

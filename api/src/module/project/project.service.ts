@@ -108,6 +108,10 @@ export class ProjectService {
     return this.projectRepository.removeUser(ProjectId, user.id);
   }
 
+  async getMyProjects(userId: number) {
+    return this.projectRepository.findByUser(userId);
+  }
+
   async getAllProjects(page: number = 1, limit: number = 10) {
     const [projects, total] = await Promise.all([
       this.projectRepository.findAll(page, limit),
