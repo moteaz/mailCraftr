@@ -27,6 +27,25 @@ export class ProjectRepository {
     });
   }
 
+  async findByUser(userId: number) {
+    return this.prisma.project.findMany({
+      where: {
+        OR: [
+          { ownerId: userId },
+          { users: { some: { id: userId } } },
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        ownerId: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findAll(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
     return this.prisma.project.findMany({

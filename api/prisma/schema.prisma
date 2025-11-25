@@ -42,7 +42,7 @@ model Categorie {
   projectId   Int
   createdById Int
 
-  project   Project    @relation(fields: [projectId], references: [id])
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdBy User       @relation(fields: [createdById], references: [id])
   templates Template[]
 
@@ -57,7 +57,7 @@ model Template {
   content     String
   categorieId Int
 
-  categorie Categorie @relation(fields: [categorieId], references: [id])
+  categorie Categorie @relation(fields: [categorieId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
