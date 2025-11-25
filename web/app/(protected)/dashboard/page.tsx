@@ -95,37 +95,37 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {user?.email?.split("@")[0]} !
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+          Welcome back, {user?.email?.split("@")[0]}!
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Here's what's happening with your projects today.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.label}
-              className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300"
+              className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-300"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 truncate">
                     {stat.label}
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                     {stat.value}
                   </p>
                 </div>
                 <div
-                  className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg flex-shrink-0`}
                 >
-                  <Icon className="w-7 h-7 text-white" />
+                  <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
               </div>
             </div>
@@ -133,9 +133,9 @@ export default function DashboardPage() {
         })}
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <p className="text-gray-600">
+      <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border border-gray-200">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-4">Quick Actions</h2>
+        <p className="text-sm sm:text-base text-gray-600">
           Use the sidebar to navigate to different sections.
         </p>
       </div>
