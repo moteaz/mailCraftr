@@ -5,6 +5,7 @@ import { AuthModule } from './module/auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ProjectModule } from './module/project/project.module';
 import { CategorieModule } from './module/categorie/categorie.module';
+import { TemplateModule } from './module/template/template.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -19,6 +20,7 @@ import configuration from './config/configuration';
     UserModule,
     ProjectModule,
     CategorieModule,
+    TemplateModule,
   ],
   controllers: [],
   providers: [],

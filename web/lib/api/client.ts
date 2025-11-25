@@ -1,4 +1,4 @@
-import { API_URL, STORAGE_KEYS } from '@/lib/constants';
+import { API_URL, STORAGE_KEYS, ROUTES } from '@/lib/constants';
 import type { ApiError } from './types';
 
 class ApiClient {
@@ -11,6 +11,14 @@ class ApiClient {
   private getToken(): string | null {
     if (typeof window === 'undefined') return null;
     return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+  }
+
+  private handleUnauthorized(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    document.cookie = 'accessToken=; path=/; max-age=0';
+    window.location.href = ROUTES.LOGIN;
   }
 
   private async request<T>(
@@ -36,6 +44,9 @@ class ApiClient {
     const data = await response.json();
 
     if (!response.ok) {
+      if (response.status === 401) {
+        this.handleUnauthorized();
+      }
       const error: ApiError = {
         message: data.message || 'Request failed',
         statusCode: response.status,

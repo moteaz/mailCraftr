@@ -45,7 +45,21 @@ export interface Category {
     id: number;
     email: string;
   };
-  templates?: any[];
+  templates?: Template[];
+}
+
+export interface Template {
+  id: number;
+  name: string;
+  description?: string;
+  content: string;
+  placeholders: { key: string; value: string }[];
+  categorieId: number;
+  createdAt: string;
+  categorie?: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface ApiError {
