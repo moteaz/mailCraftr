@@ -32,10 +32,13 @@ export default function TemplatesPage() {
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const filteredTemplates = templates.filter((t) =>
-    t.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTemplates = templates.filter((t) => {
+    const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || t.categorieId === parseInt(selectedCategory);
+    return matchesSearch && matchesCategory;
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -83,9 +86,11 @@ export default function TemplatesPage() {
       
       const response: any = await apiClient.post(API_ENDPOINTS.TEMPLATE.CREATE, payload);
       toast.success('Template created! Now add content.');
+      const category = categories.find(c => c.id === parseInt(form.categorieId));
       const newTemplate = {
         ...response.template,
         placeholders: validPlaceholders,
+        categorie: category ? { id: category.id, name: category.name } : null,
       };
       setTemplates([...templates, newTemplate]);
       setForm({ name: '', description: '', categorieId: '', placeholders: [] });
@@ -110,11 +115,11 @@ export default function TemplatesPage() {
     try {
       const response: any = await apiClient.patch(API_ENDPOINTS.TEMPLATE.UPDATE(editModal.id), {
         content: editContent,
-        // placeholders: editModal.placeholders,
       });
       const updatedTemplate = {
         ...response,
         placeholders: editModal.placeholders,
+        categorie: editModal.categorie,
       };
       setTemplates(templates.map((t) => (t.id === editModal.id ? updatedTemplate : t)));
       toast.success('Template updated successfully!');
@@ -254,29 +259,74 @@ export default function TemplatesPage() {
           </button>
         </div>
 
-        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-          <div className="text-xs sm:text-sm text-gray-600">
-            Showing {filteredTemplates.length} templates
+        <div className="mb-6 space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search templates by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+              />
+              <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm bg-white w-full sm:w-56"
+            >
+              <option value="all">📁 All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  📂 {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
-          <input
-            type="text"
-            placeholder="🔍 Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-64 text-sm"
-          />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              {filteredTemplates.length === 0 ? 'No templates found' : 
+               filteredTemplates.length === 1 ? '1 template' : 
+               `${filteredTemplates.length} templates`}
+            </p>
+            {(searchQuery || selectedCategory !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                }}
+                className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
 
         {filteredTemplates.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No templates found</p>
+          <div className="text-center py-16">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <LayoutTemplate className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No templates found</h3>
+            <p className="text-gray-500 mb-6">Try adjusting your filters or create a new template</p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all shadow-lg text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Create Template
+            </button>
           </div>
         ) : (
           <div className="grid gap-4">
             {filteredTemplates.map((template) => (
               <div
                 key={template.id}
-                className="border border-gray-200 rounded-lg p-3 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+                className="group border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-orange-200 transition-all cursor-pointer bg-white"
                 onClick={() => {
                   let placeholders = [];
                   if (typeof template.placeholders === 'string') {
@@ -298,33 +348,47 @@ export default function TemplatesPage() {
                   setEditContent(template.content || '<p></p>');
                 }}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
-                    <p className="text-gray-600 text-sm mt-1">{template.description}</p>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors truncate">{template.name}</h3>
+                        {template.description && (
+                          <p className="text-gray-600 text-sm mt-0.5 line-clamp-1">{template.description}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteModal(template.id);
-                      }}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteModal(template.id);
+                    }}
+                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                    title="Delete template"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500 mt-4">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    <span>{template.categorie?.name || 'Unknown Category'}</span>
-                  </div>
-                  {Array.isArray(template.placeholders) && template.placeholders.length > 0 && (
-                    <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
-                      {template.placeholders.length} placeholders
-                    </span>
+                <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-gray-100">
+                  {template.categorie?.name && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">
+                      <span className="font-medium">📂</span>
+                      <span>{template.categorie.name}</span>
+                    </div>
                   )}
+                  {Array.isArray(template.placeholders) && template.placeholders.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg">
+                      <span className="font-medium">{template.placeholders.length}</span>
+                      <span>placeholder{template.placeholders.length !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  <div className="ml-auto text-xs text-gray-400 group-hover:text-orange-600 transition-colors">
+                    Click to edit →
+                  </div>
                 </div>
               </div>
             ))}
@@ -333,8 +397,8 @@ export default function TemplatesPage() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-4 sm:p-6 my-8">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Create New Template</h2>
               <button
@@ -394,8 +458,8 @@ export default function TemplatesPage() {
                   disabled={creating}
                 />
                 {form.placeholders.length > 0 && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Loaded Placeholders:</p>
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Loaded {form.placeholders.length} Placeholders:</p>
                     <div className="space-y-1">
                       {form.placeholders.map((p, i) => (
                         <div key={i} className="text-xs text-gray-600 font-mono">
@@ -419,8 +483,8 @@ export default function TemplatesPage() {
       )}
 
       {editModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-4 sm:p-6 my-8">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">{editModal.name}</h2>
@@ -450,8 +514,8 @@ export default function TemplatesPage() {
               </div>
 
               <div className="lg:col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders</label>
-                <div className="space-y-2 max-h-48 lg:max-h-96 overflow-y-auto">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders ({editModal.placeholders?.length || 0})</label>
+                <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2">
                   {!editModal.placeholders || editModal.placeholders.length === 0 ? (
                     <p className="text-sm text-gray-500">No placeholders defined</p>
                   ) : (

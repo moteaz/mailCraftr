@@ -160,22 +160,50 @@ export default function UsersPage() {
           </button>
         </div>
 
-        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-          <div className="text-xs sm:text-sm text-gray-600">
-            Showing {users.length} of {total} users
+        <div className="mb-6 space-y-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search users by email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            />
+            <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
-          <input
-            type="text"
-            placeholder="🔍 Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64 text-sm"
-          />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              {filteredUsers.length === 0 ? 'No users found' : 
+               filteredUsers.length === 1 ? '1 user' : 
+               `${filteredUsers.length} users`}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
         </div>
 
         {filteredUsers.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No users found</p>
+          <div className="text-center py-16">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <UsersIcon className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No users found</h3>
+            <p className="text-gray-500 mb-6">Try adjusting your search or create a new user</p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg text-sm"
+            >
+              <UserPlus className="w-4 h-4" />
+              Create User
+            </button>
           </div>
         ) : (
           <>
@@ -183,33 +211,33 @@ export default function UsersPage() {
             {filteredUsers.map((user) => (
               <div
                 key={user.id}
-                className="border border-gray-200 rounded-xl p-3 sm:p-6 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-gray-50"
+                className="group border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-blue-200 transition-all bg-white"
               >
-                <div className="flex items-start sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0 text-sm sm:text-base">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0">
                       {user.email[0].toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-sm sm:text-lg font-semibold text-gray-900 truncate">{user.email}</h3>
-                      <p className="text-xs sm:text-sm text-gray-500">ID: {user.id}</p>
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate">{user.email}</h3>
+                      <p className="text-sm text-gray-500">User ID: {user.id}</p>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3 flex-shrink-0">
-                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap ${
                       user.role === 'SUPERADMIN' 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : 'bg-blue-100 text-blue-700'
+                        ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                        : 'bg-blue-100 text-blue-700 border border-blue-200'
                     }`}>
                       {user.role}
                     </span>
                     {user.role !== 'SUPERADMIN' && (
                     <button
                       onClick={() => setDeleteUserModal(user.id)}
-                      className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-                      aria-label="Delete user"
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete user"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                     )}
                   </div>

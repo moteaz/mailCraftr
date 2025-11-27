@@ -22,7 +22,9 @@ export class TemplateService {
     }
 
     if (category.createdById !== userId) {
-      throw new ForbiddenException('You can only create templates in your own categories');
+      throw new ForbiddenException(
+        'You can only create templates in your own categories',
+      );
     }
 
     const existing = await this.templateRepository.findByNameAndCategory(
@@ -30,22 +32,28 @@ export class TemplateService {
       dto.categorieId,
     );
     if (existing) {
-      throw new ConflictException('Template name already exists in this category');
+      throw new ConflictException(
+        'Template name already exists in this category',
+      );
     }
 
-    let placeholdersArray: any[] = Array.isArray(dto.placeholders) ? dto.placeholders : [];
-    placeholdersArray = placeholdersArray.map((p: any) => {
-      if (typeof p === 'object' && p !== null && 'key' in p && 'value' in p) {
-        return { key: String(p.key), value: String(p.value) };
-      }
-      if (Array.isArray(p) && (p as any[]).length >= 2) {
-        return { key: String(p[0]), value: String(p[1]) };
-      }
-      return null;
-    }).filter((p: any) => p !== null);
-    
+    let placeholdersArray: any[] = Array.isArray(dto.placeholders)
+      ? dto.placeholders
+      : [];
+    placeholdersArray = placeholdersArray
+      .map((p: any) => {
+        if (typeof p === 'object' && p !== null && 'key' in p && 'value' in p) {
+          return { key: String(p.key), value: String(p.value) };
+        }
+        if (Array.isArray(p) && (p as any[]).length >= 2) {
+          return { key: String(p[0]), value: String(p[1]) };
+        }
+        return null;
+      })
+      .filter((p: any) => p !== null);
+
     const placeholdersString = JSON.stringify(placeholdersArray);
-    
+
     const template = await this.templateRepository.create({
       name: dto.name,
       description: dto.description,
@@ -70,15 +78,7 @@ export class TemplateService {
 
   async findMyTemplates(userId: number) {
     const templates = await this.templateRepository.findByUser(userId);
-    return templates.map((t) => {
-      console.log(`📤 Sending template "${t.name}" with placeholders:`, t.placeholders);
-      const parsed = t.placeholders ? JSON.parse(t.placeholders) : [];
-      console.log('📤 Parsed:', parsed);
-      return {
-        ...t,
-        placeholders: parsed,
-      };
-    });
+    return templates;
   }
 
   async findOne(id: number, userId: number) {
@@ -87,14 +87,18 @@ export class TemplateService {
       throw new NotFoundException('Template not found');
     }
 
-    const category = await this.categorieRepository.findById(template.categorieId);
+    const category = await this.categorieRepository.findById(
+      template.categorieId,
+    );
     if (category?.createdById !== userId) {
       throw new ForbiddenException('You can only view your own templates');
     }
 
     return {
       ...template,
-      placeholders: template.placeholders ? JSON.parse(template.placeholders) : [],
+      placeholders: template.placeholders
+        ? JSON.parse(template.placeholders)
+        : [],
     };
   }
 
@@ -104,7 +108,9 @@ export class TemplateService {
       throw new NotFoundException('Template not found');
     }
 
-    const category = await this.categorieRepository.findById(template.categorieId);
+    const category = await this.categorieRepository.findById(
+      template.categorieId,
+    );
     if (category?.createdById !== userId) {
       throw new ForbiddenException('You can only update your own templates');
     }
@@ -115,18 +121,24 @@ export class TemplateService {
         template.categorieId,
       );
       if (existing && existing.id !== id) {
-        throw new ConflictException('Template name already exists in this category');
+        throw new ConflictException(
+          'Template name already exists in this category',
+        );
       }
     }
 
     const updated = await this.templateRepository.update(id, {
       ...dto,
-      placeholders: dto.placeholders ? JSON.stringify(dto.placeholders) : undefined,
+      placeholders: dto.placeholders
+        ? JSON.stringify(dto.placeholders)
+        : undefined,
     });
 
     return {
       ...updated,
-      placeholders: updated.placeholders ? JSON.parse(updated.placeholders) : [],
+      placeholders: updated.placeholders
+        ? JSON.parse(updated.placeholders)
+        : [],
     };
   }
 
@@ -136,7 +148,9 @@ export class TemplateService {
       throw new NotFoundException('Template not found');
     }
 
-    const category = await this.categorieRepository.findById(template.categorieId);
+    const category = await this.categorieRepository.findById(
+      template.categorieId,
+    );
     if (category?.createdById !== userId) {
       throw new ForbiddenException('You can only delete your own templates');
     }
