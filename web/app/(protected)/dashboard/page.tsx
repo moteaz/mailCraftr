@@ -93,12 +93,12 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+    <div className="max-w-7xl mx-auto space-y-3 sm:space-y-6">
+      <div className="bg-white rounded-xl p-3 sm:p-6 border border-gray-200">
+        <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
           Welcome back, {user?.email?.split("@")[0]}!
         </h1>
-        <p className="text-sm sm:text-base text-gray-600">
+        <p className="text-xs sm:text-base text-gray-600">
           Here's what's happening with your projects today.
         </p>
       </div>
@@ -115,9 +115,9 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border border-gray-200">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-4">Quick Actions</h2>
-        <p className="text-sm sm:text-base text-gray-600">
+      <div className="bg-white rounded-xl shadow-md p-3 sm:p-6 lg:p-8 border border-gray-200">
+        <h2 className="text-base sm:text-xl font-bold text-gray-900 mb-2 sm:mb-4">Quick Actions</h2>
+        <p className="text-xs sm:text-base text-gray-600">
           Use the sidebar to navigate to different sections.
         </p>
       </div>
