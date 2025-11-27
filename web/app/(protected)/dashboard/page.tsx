@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
 import { Users, FolderOpen, FileText } from "lucide-react";
+import { StatCard } from "@/components/common/stat-card";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -103,31 +104,15 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-300"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 truncate">
-                    {stat.label}
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {stat.value}
-                  </p>
-                </div>
-                <div
-                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg flex-shrink-0`}
-                >
-                  <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.label}
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            gradient={stat.color}
+          />
+        ))}
       </div>
 
       <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8 border border-gray-200">
