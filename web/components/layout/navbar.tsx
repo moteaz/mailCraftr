@@ -23,22 +23,22 @@ export function Navbar({ onMobileMenuToggle, isMobileMenuOpen }: NavbarProps) {
             {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
           </button>
 
-          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-xs sm:text-sm">M</span>
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">M</span>
             </div>
-            <h1 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
+            <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent truncate">
               MailCraftr
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <div className="hidden md:block text-right max-w-[200px]">
-            <p className="text-sm font-medium text-gray-900 truncate">{user?.email}</p>
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="hidden sm:block text-right max-w-[150px] lg:max-w-[200px]">
+            <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{user?.email}</p>
             <p className="text-xs text-gray-500">{user?.role}</p>
           </div>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-lg text-xs sm:text-base flex-shrink-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-lg text-sm flex-shrink-0">
             {user?.email?.[0].toUpperCase()}
           </div>
         </div>

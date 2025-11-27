@@ -23,14 +23,16 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           id={selectId}
           name={name}
           className={cn(
-            'block w-full px-3 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed text-sm sm:text-base',
+            'block w-full px-3 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed text-lg min-h-[48px] appearance-none bg-white cursor-pointer',
+            'bg-[url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-10',
+            '[&>option]:py-4 [&>option]:text-lg [&>option]:leading-loose',
             error ? 'border-red-500' : 'border-gray-300',
             className
           )}
           {...props}
         >
           {options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.value} className="py-4 text-lg leading-loose">
               {option.label}
             </option>
           ))}

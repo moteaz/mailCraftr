@@ -34,8 +34,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-invalid={!!error}
             aria-describedby={error ? `${inputId}-error` : undefined}
             className={cn(
-              'block w-full px-3 py-2 sm:py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed text-sm sm:text-base',
-              Icon && 'pl-9 sm:pl-10',
+              'block w-full px-3 py-2.5 sm:py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed text-base min-h-[44px]',
+              Icon && 'pl-10',
               error ? 'border-red-500' : 'border-gray-300',
               className
             )}
