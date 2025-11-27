@@ -140,28 +140,28 @@ export default function UsersPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
-              <UsersIcon className="w-6 h-6 text-white" />
+      <div className="bg-white rounded-xl shadow-lg p-3 sm:p-8 border border-gray-200">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg flex-shrink-0">
+              <UsersIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-              <p className="text-gray-600">Manage system users</p>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">Users</h1>
+              <p className="text-xs sm:text-base text-gray-600">Manage system users</p>
             </div>
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg text-sm sm:text-base whitespace-nowrap w-full sm:w-auto justify-center"
           >
-            <UserPlus className="w-5 h-5" />
+            <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
             New User
           </button>
         </div>
 
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <div className="text-sm text-gray-600">
+        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+          <div className="text-xs sm:text-sm text-gray-600">
             Showing {users.length} of {total} users
           </div>
           <input
@@ -169,7 +169,7 @@ export default function UsersPage() {
             placeholder="🔍 Search users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+            className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64 text-sm"
           />
         </div>
 
@@ -179,24 +179,24 @@ export default function UsersPage() {
           </div>
         ) : (
           <>
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
             {filteredUsers.map((user) => (
               <div
                 key={user.id}
-                className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-gray-50"
+                className="border border-gray-200 rounded-xl p-3 sm:p-6 hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-gray-50"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-lg">
+                <div className="flex items-start sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0 text-sm sm:text-base">
                       {user.email[0].toUpperCase()}
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{user.email}</h3>
-                      <p className="text-sm text-gray-500">ID: {user.id}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm sm:text-lg font-semibold text-gray-900 truncate">{user.email}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">ID: {user.id}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3 flex-shrink-0">
+                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                       user.role === 'SUPERADMIN' 
                         ? 'bg-purple-100 text-purple-700' 
                         : 'bg-blue-100 text-blue-700'
@@ -206,7 +206,8 @@ export default function UsersPage() {
                     {user.role !== 'SUPERADMIN' && (
                     <button
                       onClick={() => setDeleteUserModal(user.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                      aria-label="Delete user"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -226,10 +227,10 @@ export default function UsersPage() {
       </div>
 
       {deleteUserModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Delete User</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">Delete User</h2>
               <button
                 onClick={() => setDeleteUserModal(null)}
                 className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -238,7 +239,7 @@ export default function UsersPage() {
               </button>
             </div>
 
-            <p className="text-gray-600 mb-6">
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
               Are you sure you want to delete this user? This action cannot be undone.
             </p>
 
@@ -267,10 +268,10 @@ export default function UsersPage() {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Create New User</h2>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 sm:p-6 my-4 max-h-[calc(100vh-2rem)]">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 pr-2">Create New User</h2>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -279,7 +280,7 @@ export default function UsersPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 overflow-y-auto max-h-[calc(100vh-12rem)]">
               <Input
                 label="Email Address"
                 name="email"
@@ -304,18 +305,18 @@ export default function UsersPage() {
                 disabled={creating}
               />
 
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-xl border border-purple-100">
-                <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-3 sm:p-4 rounded-xl border border-purple-100 max-h-[40vh] overflow-y-auto">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center gap-2">
                   <FolderOpen className="w-4 h-4 text-purple-600" />
                   Assign to Project (Optional)
                 </label>
-                <div className="relative mb-3">
+                <div className="relative mb-2 sm:mb-3">
                   <input
                     type="text"
                     placeholder="🔍 Search projects..."
                     value={searchProject}
                     onChange={(e) => setSearchProject(e.target.value)}
-                    className="block w-full px-4 py-2.5 border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white shadow-sm"
+                    className="block w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white shadow-sm text-sm"
                     disabled={creating}
                   />
                   {searchProject && (
@@ -329,15 +330,15 @@ export default function UsersPage() {
                   )}
                 </div>
                 {form.projectIds.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                     {form.projectIds.map((projectId) => {
                       const project = projects.find((p) => p.id.toString() === projectId);
                       return (
-                        <div key={projectId} className="flex items-center gap-2 bg-white border-2 border-purple-300 rounded-lg px-3 py-2 shadow-sm">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                            <FolderOpen className="w-3 h-3 text-white" />
+                        <div key={projectId} className="flex items-center gap-1.5 sm:gap-2 bg-white border-2 border-purple-300 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 shadow-sm">
+                          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                            <FolderOpen className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                           </div>
-                          <span className="font-medium text-sm text-gray-800">{project?.title}</span>
+                          <span className="font-medium text-xs sm:text-sm text-gray-800 truncate max-w-[120px] sm:max-w-none">{project?.title}</span>
                           <button
                             type="button"
                             onClick={() => setForm({ ...form, projectIds: form.projectIds.filter(id => id !== projectId) })}
@@ -360,7 +361,7 @@ export default function UsersPage() {
                         setSearchProject('');
                       }
                     }}
-                    className="block w-full px-4 py-2.5 border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 transition-all bg-white shadow-sm font-medium text-gray-700"
+                    className="block w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 transition-all bg-white shadow-sm font-medium text-gray-700 text-sm"
                     disabled={creating}
                     size={Math.min(projects.filter((p) => p.title.toLowerCase().includes(searchProject.toLowerCase())).length + 1, 5)}
                   >

@@ -66,15 +66,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-3 sm:p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 shadow-xl shadow-blue-500/30">
+        <div className="text-center mb-4 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl sm:rounded-2xl mb-2 sm:mb-4 shadow-xl shadow-blue-500/30">
             <LogIn className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">Welcome Back</h1>
-          <p className="text-sm sm:text-base text-gray-600">Sign in to continue to MailCraftr</p>
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">Welcome Back</h1>
+          <p className="text-xs sm:text-base text-gray-600">Sign in to continue to MailCraftr</p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl p-5 sm:p-8 border border-gray-200">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-8 border border-gray-200">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <Input
               label="Email Address"
