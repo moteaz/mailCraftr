@@ -239,7 +239,7 @@ export default function TemplatesPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-3 sm:p-8 border border-gray-200">
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-200">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center shadow-lg flex-shrink-0">
@@ -252,9 +252,9 @@ export default function TemplatesPage() {
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all shadow-lg text-sm sm:text-base whitespace-nowrap w-full sm:w-auto justify-center"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-700 hover:to-red-700 transition-all shadow-lg text-sm sm:text-base whitespace-nowrap w-full sm:w-auto min-h-[44px]"
           >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <Plus className="w-5 h-5" />
             New Template
           </button>
         </div>
@@ -276,11 +276,11 @@ export default function TemplatesPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm bg-white w-full sm:w-56"
+              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-base bg-white w-full sm:w-56 min-h-[44px] appearance-none cursor-pointer bg-[url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-10 [&>option]:py-3 [&>option]:text-base"
             >
-              <option value="all">📁 All Categories</option>
+              <option value="all" className="py-3 text-base">📁 All Categories</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <option key={cat.id} value={cat.id} className="py-3 text-base">
                   📂 {cat.name}
                 </option>
               ))}
@@ -427,7 +427,7 @@ export default function TemplatesPage() {
                   placeholder="Template description"
                   disabled={creating}
                   rows={2}
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="block w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base resize-y"
                 />
               </div>
 
@@ -436,12 +436,12 @@ export default function TemplatesPage() {
                 <select
                   value={form.categorieId}
                   onChange={(e) => setForm({ ...form, categorieId: e.target.value })}
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="block w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base min-h-[44px] appearance-none bg-white cursor-pointer bg-[url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-10 [&>option]:py-3 [&>option]:text-base"
                   disabled={creating}
                 >
-                  <option value="">Select a category</option>
+                  <option value="" className="py-3 text-base">Select a category</option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
+                    <option key={cat.id} value={cat.id} className="py-3 text-base">
                       {cat.name}
                     </option>
                   ))}
@@ -503,8 +503,8 @@ export default function TemplatesPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-              <div className="lg:col-span-2">
+            <div className="space-y-4">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Content Editor</label>
                 <RichTextEditor
                   content={editContent}
@@ -513,9 +513,9 @@ export default function TemplatesPage() {
                 />
               </div>
 
-              <div className="lg:col-span-1">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders ({editModal.placeholders?.length || 0})</label>
-                <div className="space-y-2 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
                   {!editModal.placeholders || editModal.placeholders.length === 0 ? (
                     <p className="text-sm text-gray-500">No placeholders defined</p>
                   ) : (
@@ -561,7 +561,7 @@ export default function TemplatesPage() {
               />
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => {
                   setEditModal(null);
@@ -604,7 +604,7 @@ export default function TemplatesPage() {
               Are you sure you want to delete this template? This action cannot be undone.
             </p>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => setDeleteModal(null)}
                 variant="secondary"

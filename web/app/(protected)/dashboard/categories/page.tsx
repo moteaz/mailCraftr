@@ -119,7 +119,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-3 sm:p-8 border border-gray-200">
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-200">
         <PageHeader
           icon={FileText}
           title="Categories"
@@ -128,11 +128,10 @@ export default function CategoriesPage() {
           action={
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all shadow-lg text-sm sm:text-base whitespace-nowrap"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:from-green-700 hover:to-teal-700 transition-all shadow-lg text-sm sm:text-base whitespace-nowrap w-full sm:w-auto min-h-[44px]"
             >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden xs:inline">New Category</span>
-              <span className="xs:hidden">New</span>
+              <Plus className="w-5 h-5" />
+              <span>New Category</span>
             </button>
           }
         />
