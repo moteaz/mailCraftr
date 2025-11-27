@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/api/endpoints";
-import { Users, FolderOpen, FileText } from "lucide-react";
+import { Users, FolderOpen, FileText,ChartBarStacked  } from "lucide-react";
 import { StatCard } from "@/components/common/stat-card";
 
 export default function DashboardPage() {
@@ -66,10 +66,10 @@ export default function DashboardPage() {
       color: "from-purple-500 to-pink-500",
     },
     {
-      icon: FileText,
+      icon: ChartBarStacked,
       label: "Total Categories",
       value: totalCategoriesCount.toString(),
-      color: "from-teal-500 to-green-500",
+      color: "from-green-500 to-yellow-500",
     },
     {
       icon: FileText,
