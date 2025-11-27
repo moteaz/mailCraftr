@@ -110,7 +110,7 @@ export default function TemplatesPage() {
     try {
       const response: any = await apiClient.patch(API_ENDPOINTS.TEMPLATE.UPDATE(editModal.id), {
         content: editContent,
-        placeholders: editModal.placeholders,
+        // placeholders: editModal.placeholders,
       });
       const updatedTemplate = {
         ...response,
