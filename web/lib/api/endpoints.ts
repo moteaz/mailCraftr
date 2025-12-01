@@ -27,4 +27,12 @@ export const API_ENDPOINTS = {
     UPDATE: (id: number) => `/templates/${id}`,
     DELETE: (id: number) => `/templates/${id}`,
   },
+  WEBHOOK: {
+    CREATE: "/webhooks",
+    MY_WEBHOOKS: "/webhooks/my-webhooks",
+    ALL: "/webhooks/all",
+    BY_ID: (id: number) => `/webhooks/${id}`,
+    UPDATE: (id: number) => `/webhooks/${id}`,
+    DELETE: (id: number) => `/webhooks/${id}`,
+  },
 } as const;
