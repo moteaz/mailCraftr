@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import type { Project } from '@/lib/api/types';
+import type { Project } from '@/types';
 
 interface CategoryFormProps {
   form: { name: string; description: string; projectId: string };

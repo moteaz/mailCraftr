@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
-import type { Category } from '@/lib/api/types';
+import type { Category } from '@/types';
 
 export const categoryService = {
   getMyCategories: () => apiClient.get<Category[]>(API_ENDPOINTS.CATEGORY.MY_CATEGORIES),

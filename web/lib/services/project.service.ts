@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
-import type { Project } from '@/lib/api/types';
+import type { Project } from '@/types';
 
 export const projectService = {
   getMyProjects: () => apiClient.get<Project[]>(API_ENDPOINTS.PROJECT.MY_PROJECTS),

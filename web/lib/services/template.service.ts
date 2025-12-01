@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
-import type { Template } from '@/lib/api/types';
+import type { Template } from '@/types';
 
 export const templateService = {
   getMyTemplates: () => apiClient.get<Template[]>(API_ENDPOINTS.TEMPLATE.MY_TEMPLATES),

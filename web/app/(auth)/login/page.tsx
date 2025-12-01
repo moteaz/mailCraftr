@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { validators, validationMessages } from '@/lib/utils/validators';
-import { ROUTES } from '@/lib/constants';
+import { ROUTES, MESSAGES } from '@/constants';
 import { toast } from 'sonner';
-import type { ApiError } from '@/lib/api/types';
+import type { ApiError } from '@/types';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,7 +53,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(form);
-      toast.success('Welcome back!');
+      toast.success(MESSAGES.SUCCESS.LOGIN);
       router.push(ROUTES.DASHBOARD);
     } catch (err) {
       const error = err as ApiError;

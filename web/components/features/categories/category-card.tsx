@@ -1,6 +1,6 @@
 import { Calendar, FolderOpen, Edit2, Trash2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils/format';
-import type { Category } from '@/lib/api/types';
+import type { Category } from '@/types';
 
 interface CategoryCardProps {
   category: Category;

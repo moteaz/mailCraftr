@@ -1,0 +1,153 @@
+import { useState } from 'react';
+import { X, Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import type { Category } from '@/types';
+
+interface CreateTemplateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  categories: Category[];
+  onCreate: (form: any) => Promise<void>;
+}
+
+export function CreateTemplateModal({ isOpen, onClose, categories, onCreate }: CreateTemplateModalProps) {
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    categorieId: '',
+    placeholders: [] as { key: string; value: string }[],
+  });
+  const [creating, setCreating] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleJsonUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+      toast.error('Please upload a valid JSON file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        const placeholders = Object.entries(json).map(([key, value]) => ({
+          key,
+          value: String(value),
+        }));
+        setForm({ ...form, placeholders });
+        toast.success(`Loaded ${placeholders.length} placeholders from JSON`);
+      } catch (err) {
+        toast.error('Invalid JSON file format');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.categorieId) {
+      toast.error('Name and category are required');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      await onCreate(form);
+      setForm({ name: '', description: '', categorieId: '', placeholders: [] });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">Create New Template</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Name"
+            name="name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Template name"
+            disabled={creating}
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Template description"
+              disabled={creating}
+              rows={2}
+              className="block w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base resize-y"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+            <select
+              value={form.categorieId}
+              onChange={(e) => setForm({ ...form, categorieId: e.target.value })}
+              className="block w-full px-3 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-base min-h-[44px] appearance-none bg-white cursor-pointer bg-[url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-10"
+              disabled={creating}
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders (JSON File)</label>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleJsonUpload}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+              disabled={creating}
+            />
+            {form.placeholders.length > 0 && (
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
+                <p className="text-sm font-medium text-gray-700 mb-2">Loaded {form.placeholders.length} Placeholders:</p>
+                <div className="space-y-1">
+                  {form.placeholders.map((p, i) => (
+                    <div key={i} className="text-xs text-gray-600 font-mono">
+                      {`{{${p.key}}}`} = {p.value}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 mt-2">
+              Upload a JSON file with key-value pairs (e.g., {`{"name": "John", "email": "john@example.com"}`})
+            </p>
+          </div>
+
+          <Button type="submit" loading={creating} loadingText="Creating..." icon={Plus}>
+            Create Template
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+}

@@ -10,7 +10,7 @@ import {
   Gauge,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/constants";
 import { cn } from "@/lib/utils/cn";
 
 interface SidebarProps {

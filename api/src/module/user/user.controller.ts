@@ -29,10 +29,7 @@ export class UserController {
 
   @Get()
   @Roles(Role.SUPERADMIN)
-  findAll(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
     return this.userService.findAll(pageNum, limitNum);
