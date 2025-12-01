@@ -115,7 +115,7 @@ export default function ProjectsListPage() {
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="🔍 Search projects by title..."
+          placeholder=" Search projects by title..."
           resultCount={filteredProjects.length}
         />
 
