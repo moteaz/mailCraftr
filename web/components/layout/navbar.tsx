@@ -2,6 +2,7 @@
 
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { NotificationBell } from './notification-bell';
 
 interface NavbarProps {
   onMobileMenuToggle: (open: boolean) => void;
@@ -34,6 +35,7 @@ export function Navbar({ onMobileMenuToggle, isMobileMenuOpen }: NavbarProps) {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <NotificationBell />
           <div className="hidden sm:block text-right max-w-[150px] lg:max-w-[200px]">
             <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{user?.email}</p>
             <p className="text-xs text-gray-500">{user?.role}</p>
