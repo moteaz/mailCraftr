@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth-store';
+import { useNotificationStore } from '@/store/notification-store';
 import { session } from '@/lib/auth/session';
 import { toast } from 'sonner';
 import { API_URL } from '@/constants';
 
 export function useWebhookNotifications() {
   const { user } = useAuthStore();
+  const addNotification = useNotificationStore((state) => state.addNotification);
 
   useEffect(() => {
     if (!user || user.role !== 'SUPERADMIN') {
@@ -30,6 +32,11 @@ export function useWebhookNotifications() {
     eventSource.onmessage = (event) => {
       console.log('📨 SSE Message received:', event.data);
       const data = JSON.parse(event.data);
+      
+      // Add to notification store
+      addNotification(data.event, data.timestamp, data.data);
+      
+      // Show toast
       toast.info(`🔔 ${data.event}`, {
         description: `Triggered at ${new Date(data.timestamp).toLocaleTimeString()}`,
         duration: 4000,
