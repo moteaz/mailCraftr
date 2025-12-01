@@ -98,7 +98,7 @@ export function CreateUserModal({ isOpen, onClose, projects, onCreate }: CreateU
             <div className="relative mb-2 sm:mb-3">
               <input
                 type="text"
-                placeholder="🔍 Search projects..."
+                placeholder=" Search projects..."
                 value={searchProject}
                 onChange={(e) => setSearchProject(e.target.value)}
                 className="block w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white shadow-sm text-sm"

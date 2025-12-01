@@ -79,7 +79,7 @@ export default function UsersPage() {
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="🔍 Search users by email..."
+          placeholder=" Search users by email..."
           resultCount={filteredUsers.length}
         />
 

@@ -140,7 +140,7 @@ export default function CategoriesPage() {
         <SearchBar
           value={query}
           onChange={setQuery}
-          placeholder="🔍 Search categories..."
+          placeholder=" Search categories..."
           resultCount={filteredCategories.length}
         />
 
