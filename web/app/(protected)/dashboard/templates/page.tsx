@@ -33,6 +33,8 @@ export default function TemplatesPage() {
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const filteredTemplates = templates.filter((t) => {
     const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -483,105 +485,229 @@ export default function TemplatesPage() {
       )}
 
       {editModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">{editModal.name}</h2>
-                {editModal.description && (
-                  <p className="text-sm text-gray-600 mt-1">{editModal.description}</p>
-                )}
+        <div className="fixed inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-md flex items-center justify-center z-50 p-0 sm:p-3 animate-in fade-in duration-200">
+          <div className="bg-white rounded-none sm:rounded-3xl shadow-2xl w-full h-full sm:h-[96vh] sm:max-w-[98vw] lg:max-w-[90vw] xl:max-w-[85vw] flex flex-col overflow-hidden border-0 sm:border border-gray-200/50">
+            {/* Enhanced Header - Hidden in Fullscreen */}
+            {!isFullscreen && (
+              <div className="relative bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 p-[1px]">
+                <div className="bg-white rounded-t-none sm:rounded-t-3xl">
+                  <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="relative">
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 flex items-center justify-center shadow-lg">
+                          <FileText className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate flex items-center gap-2">
+                          {editModal.name}
+                          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Editing</span>
+                        </h2>
+                        {editModal.description && (
+                          <p className="text-xs text-gray-600 truncate mt-0.5">{editModal.description}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={downloadPDF}
+                        className="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+                        title="Download PDF"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span className="hidden lg:inline">Export</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditModal(null);
+                          setEditContent('');
+                        }}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 group"
+                        aria-label="Close editor"
+                      >
+                        <X className="w-5 h-5 text-gray-500 group-hover:text-gray-900 transition-colors" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="px-4 sm:px-6 pb-3 flex items-center gap-4 text-xs text-gray-600">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <span>Auto-save</span>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-1.5">
+                      <span>{editModal.placeholders?.length || 0} variables</span>
+                    </div>
+                    <div className="hidden md:flex items-center gap-1.5 ml-auto">
+                      <kbd className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">Ctrl+S</kbd>
+                      <span>to save</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <button
-                onClick={() => {
-                  setEditModal(null);
-                  setEditContent('');
-                }}
-                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            )}
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Content Editor</label>
-                <RichTextEditor
-                  content={editContent}
-                  onChange={setEditContent}
-                  placeholder="Write your template content here..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders ({editModal.placeholders?.length || 0})</label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
+            {/* 3-Column Layout */}
+            <div className="flex-1 overflow-hidden flex flex-col lg:flex-row bg-gray-50">
+              
+              {/* Left: Variables */}
+              <div className={`w-full lg:w-72 xl:w-80 border-b lg:border-b-0 lg:border-r border-gray-200 bg-white flex flex-col max-h-[30vh] lg:max-h-none transition-all duration-300 ${isFullscreen ? 'lg:w-64 xl:w-72' : ''}`}>
+                <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                  <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    🏷️ Variables
+                    <span className="ml-auto text-xs font-normal text-gray-500">{editModal.placeholders?.length || 0}</span>
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-1">Click to insert</p>
+                </div>
+                <div className="flex-1 overflow-y-auto p-3 space-y-2">
                   {!editModal.placeholders || editModal.placeholders.length === 0 ? (
-                    <p className="text-sm text-gray-500">No placeholders defined</p>
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <span className="text-2xl">📝</span>
+                      </div>
+                      <p className="text-sm text-gray-500">No variables</p>
+                    </div>
                   ) : (
                     editModal.placeholders.map((p, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => insertPlaceholder(p.key)}
-                        className="w-full text-left p-3 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-colors group"
+                        className="w-full text-left p-3 bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 border border-orange-200/50 rounded-xl transition-all duration-200 group hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
                       >
-                        <div className="font-mono text-sm text-orange-700 font-semibold group-hover:text-orange-800">
-                          {`{{${p.key}}}`}
+                        <div className="flex items-start justify-between gap-2 mb-1.5">
+                          <code className="font-mono text-xs font-bold text-orange-700 break-all">{`{{${p.key}}}`}</code>
+                          <span className="text-xs text-orange-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">→</span>
                         </div>
-                        <div className="text-xs text-gray-600 mt-1">{p.value || 'No default value'}</div>
-                        <div className="text-xs text-orange-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          Click to insert
-                        </div>
+                        <p className="text-xs text-gray-600 line-clamp-2">{p.value || 'No preview'}</p>
                       </button>
                     ))
                   )}
                 </div>
               </div>
+
+              {/* Center: Editor */}
+              <div className={`flex-1 flex flex-col overflow-hidden bg-white transition-all duration-300 ${isFullscreen ? 'lg:flex-[2]' : ''}`}>
+                <div className="px-4 sm:px-6 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">✍️ Editor</h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowPreviewModal(true)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200"
+                      title="Show preview"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      <span className="hidden sm:inline">Preview</span>
+                    </button>
+                    <button
+                      onClick={() => setIsFullscreen(!isFullscreen)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700 bg-white hover:bg-gray-100 rounded-lg transition-all duration-200 border border-gray-200"
+                      title={isFullscreen ? "Exit fullscreen" : "Fullscreen mode"}
+                    >
+                      {isFullscreen ? (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          <span className="hidden sm:inline">Exit</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                          </svg>
+                          <span className="hidden sm:inline">Expand</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                  <div className="max-w-4xl mx-auto">
+                    <RichTextEditor
+                      content={editContent}
+                      onChange={setEditContent}
+                      placeholder="Start writing..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+
             </div>
 
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Preview</label>
+            {/* Footer - Hidden in Fullscreen */}
+            {!isFullscreen && (
+              <div className="border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-gray-400" />
+                    <span>Last saved: Just now</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 sm:flex-initial justify-end">
+                  <Button
+                    onClick={() => {
+                      setEditModal(null);
+                      setEditContent('');
+                    }}
+                    variant="secondary"
+                    className="flex-1 sm:flex-initial min-w-[100px]"
+                    disabled={updating}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleUpdate}
+                    loading={updating}
+                    loadingText="Saving..."
+                    icon={Edit2}
+                    className="flex-1 sm:flex-initial min-w-[120px] bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600"
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showPreviewModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                👁️ Preview
+              </h2>
+              <div className="flex items-center gap-2">
                 <button
-                  type="button"
                   onClick={downloadPDF}
-                  className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200"
                 >
                   <Download className="w-4 h-4" />
-                  Download PDF
+                  <span className="hidden sm:inline">Download PDF</span>
+                </button>
+                <button
+                  onClick={() => setShowPreviewModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close preview"
+                >
+                  <X className="w-5 h-5" />
                 </button>
               </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
               <div 
                 id="pdf-preview"
-                className="p-4 bg-white rounded-lg border border-gray-200 text-sm min-h-32 prose max-w-none"
+                className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm min-h-[400px] prose prose-base max-w-none mx-auto"
                 dangerouslySetInnerHTML={{
-                  __html: editContent ? replacePlaceholders(editContent, editModal.placeholders) : '<p class="text-gray-400">Preview will appear here...</p>'
+                  __html: editContent ? replacePlaceholders(editContent, editModal.placeholders) : '<div class="flex flex-col items-center justify-center py-12 text-center"><div class="w-20 h-20 mb-4 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center"><span class="text-3xl">📄</span></div><p class="text-gray-400 text-base">No content to preview</p></div>'
                 }}
               />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                onClick={() => {
-                  setEditModal(null);
-                  setEditContent('');
-                }}
-                variant="secondary"
-                className="flex-1"
-                disabled={updating}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleUpdate}
-                loading={updating}
-                loadingText="Saving..."
-                icon={Edit2}
-                className="flex-1"
-              >
-                Save Template
-              </Button>
             </div>
           </div>
         </div>
