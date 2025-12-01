@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   CreateProjectDto,
   AddUserToProjectDto,
@@ -10,12 +11,14 @@ import {
 } from './dto/project.dto';
 import { ProjectRepository } from '../../common/repositories/project.repository';
 import { UserRepository } from '../../common/repositories/user.repository';
+import { WEBHOOK_EVENTS } from '../../common/events/webhook.events';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly userRepository: UserRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: CreateProjectDto, userId: number) {
@@ -29,6 +32,12 @@ export class ProjectService {
       title: dto.title,
       description: dto.description,
       ownerId: userId,
+    });
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.PROJECT_CREATED, {
+      event: WEBHOOK_EVENTS.PROJECT_CREATED,
+      timestamp: new Date().toISOString(),
+      data: project,
     });
 
     return {
@@ -51,6 +60,12 @@ export class ProjectService {
         'Cannot delete project with associated users or data',
       );
     }
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.PROJECT_DELETED, {
+      event: WEBHOOK_EVENTS.PROJECT_DELETED,
+      timestamp: new Date().toISOString(),
+      data: project,
+    });
 
     return { message: 'Project deleted successfully', project };
   }
@@ -77,7 +92,15 @@ export class ProjectService {
       throw new ConflictException('User already in Project');
     }
 
-    return this.projectRepository.addUser(ProjectId, user.id);
+    const result = await this.projectRepository.addUser(ProjectId, user.id);
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.PROJECT_USER_ADDED, {
+      event: WEBHOOK_EVENTS.PROJECT_USER_ADDED,
+      timestamp: new Date().toISOString(),
+      data: { projectId: ProjectId, userId: user.id, email: user.email },
+    });
+
+    return result;
   }
 
   async DeleteUserFromProject(
@@ -105,7 +128,15 @@ export class ProjectService {
       throw new ConflictException('User is not part of this project');
     }
 
-    return this.projectRepository.removeUser(ProjectId, user.id);
+    const result = await this.projectRepository.removeUser(ProjectId, user.id);
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.PROJECT_USER_REMOVED, {
+      event: WEBHOOK_EVENTS.PROJECT_USER_REMOVED,
+      timestamp: new Date().toISOString(),
+      data: { projectId: ProjectId, userId: user.id, email: user.email },
+    });
+
+    return result;
   }
 
   async getMyProjects(userId: number) {

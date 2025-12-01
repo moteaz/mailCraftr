@@ -8,12 +8,15 @@ import { useAuthStore } from '@/store/auth-store';
 import { session } from '@/lib/auth/session';
 import { ROUTES } from '@/constants';
 import { Spinner } from '@/components/ui/spinner';
+import { useWebhookNotifications } from '@/hooks/use-webhook-notifications';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { initialize, isAuthenticated } = useAuthStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  useWebhookNotifications();
 
   useEffect(() => {
     initialize();

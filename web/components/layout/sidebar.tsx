@@ -8,6 +8,7 @@ import {
   FolderOpen,
   FileText,
   Gauge,
+  Webhook,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/constants";
@@ -36,6 +37,7 @@ export function Sidebar({ isMobileMenuOpen, onClose }: SidebarProps) {
     { icon: FolderOpen, label: "Projects", path: ROUTES.PROJECTS_LIST },
     { icon: FileText, label: "Categories", path: ROUTES.CATEGORIES_LIST },
     { icon: LayoutTemplate, label: "Templates", path: ROUTES.TEMPLATES_LIST },
+    { icon: Webhook, label: "Webhooks", path: ROUTES.WEBHOOKS_LIST },
   ];
 
   return (

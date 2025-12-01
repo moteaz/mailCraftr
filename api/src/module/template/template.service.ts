@@ -4,15 +4,18 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateTemplateDto, UpdateTemplateDto } from './dto/template.dto';
 import { TemplateRepository } from '../../common/repositories/template.repository';
 import { CategorieRepository } from '../../common/repositories/categorie.repository';
+import { WEBHOOK_EVENTS } from '../../common/events/webhook.events';
 
 @Injectable()
 export class TemplateService {
   constructor(
     private readonly templateRepository: TemplateRepository,
     private readonly categorieRepository: CategorieRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: CreateTemplateDto, userId: number) {
@@ -62,17 +65,25 @@ export class TemplateService {
       categorieId: dto.categorieId,
     });
 
+    const result = {
+      id: template.id,
+      name: template.name,
+      description: template.description,
+      content: template.content,
+      categorieId: template.categorieId,
+      createdAt: template.createdAt,
+      placeholders: placeholdersArray,
+    };
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.TEMPLATE_CREATED, {
+      event: WEBHOOK_EVENTS.TEMPLATE_CREATED,
+      timestamp: new Date().toISOString(),
+      data: result,
+    });
+
     return {
       message: 'Template created successfully',
-      template: {
-        id: template.id,
-        name: template.name,
-        description: template.description,
-        content: template.content,
-        categorieId: template.categorieId,
-        createdAt: template.createdAt,
-        placeholders: placeholdersArray,
-      },
+      template: result,
     };
   }
 
@@ -134,12 +145,20 @@ export class TemplateService {
         : undefined,
     });
 
-    return {
+    const result = {
       ...updated,
       placeholders: updated.placeholders
         ? JSON.parse(updated.placeholders)
         : [],
     };
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.TEMPLATE_UPDATED, {
+      event: WEBHOOK_EVENTS.TEMPLATE_UPDATED,
+      timestamp: new Date().toISOString(),
+      data: result,
+    });
+
+    return result;
   }
 
   async remove(id: number, userId: number) {
@@ -156,6 +175,13 @@ export class TemplateService {
     }
 
     await this.templateRepository.delete(id);
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.TEMPLATE_DELETED, {
+      event: WEBHOOK_EVENTS.TEMPLATE_DELETED,
+      timestamp: new Date().toISOString(),
+      data: { id },
+    });
+
     return { message: 'Template deleted successfully' };
   }
 }

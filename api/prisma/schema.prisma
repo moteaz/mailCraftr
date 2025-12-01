@@ -16,6 +16,7 @@ model User {
   ownedProjects Project[]   @relation("UserOwnedProjects")
   projects      Project[]   @relation("UserProjects")
   categories    Categorie[]
+  webhooks      Webhook[]
 
   createdAt DateTime @default(now())
 
@@ -67,6 +68,17 @@ model Template {
 }
 
 // Many-to-Many pivot table created automatically by Prisma
+
+model Webhook {
+  id        Int      @id @default(autoincrement())
+  url       String
+  events    String   // JSON array of event names
+  secret    String?  // Optional secret for signature verification
+  active    Boolean  @default(true)
+  createdBy Int
+  user      User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
 
 enum Role {
   SUPERADMIN

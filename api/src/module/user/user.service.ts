@@ -3,9 +3,11 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { UserRepository } from '../../common/repositories/user.repository';
 import { EmailService } from '../../common/services/email.service';
+import { WEBHOOK_EVENTS } from '../../common/events/webhook.events';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -13,6 +15,7 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly emailService: EmailService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: CreateUserDto) {
@@ -37,6 +40,12 @@ export class UserService {
         'Failed to send credentials email. User not created.',
       );
     }
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.USER_CREATED, {
+      event: WEBHOOK_EVENTS.USER_CREATED,
+      timestamp: new Date().toISOString(),
+      data: user,
+    });
 
     return {
       message: 'User created successfully and credentials sent via email',
@@ -80,7 +89,15 @@ export class UserService {
       updateData.password = await bcrypt.hash(dto.password, 12);
     }
 
-    return this.userRepository.update(id, updateData);
+    const updated = await this.userRepository.update(id, updateData);
+
+    this.eventEmitter.emit(WEBHOOK_EVENTS.USER_UPDATED, {
+      event: WEBHOOK_EVENTS.USER_UPDATED,
+      timestamp: new Date().toISOString(),
+      data: updated,
+    });
+
+    return updated;
   }
 
   async remove(id: number) {
@@ -91,7 +108,15 @@ export class UserService {
     }
 
     try {
-      return this.userRepository.delete(id);
+      const deleted = await this.userRepository.delete(id);
+
+      this.eventEmitter.emit(WEBHOOK_EVENTS.USER_DELETED, {
+        event: WEBHOOK_EVENTS.USER_DELETED,
+        timestamp: new Date().toISOString(),
+        data: deleted,
+      });
+
+      return deleted;
     } catch (error) {
       throw new ConflictException(
         'Cannot delete user with associated projects or categories. Remove them first.',

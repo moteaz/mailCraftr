@@ -9,6 +9,7 @@ export const ROUTES = {
   PROJECTS_LIST: '/dashboard/projects',
   CATEGORIES_LIST: '/dashboard/categories',
   TEMPLATES_LIST: '/dashboard/templates',
+  WEBHOOKS_LIST: '/dashboard/webhooks',
 } as const;
 
 // Storage Keys
@@ -58,4 +59,5 @@ export const GRADIENTS = {
   PROJECTS: 'from-purple-600 to-pink-600',
   CATEGORIES: 'from-green-600 to-teal-600',
   TEMPLATES: 'from-orange-600 to-red-600',
+  WEBHOOKS: 'from-purple-600 to-pink-600',
 } as const;
