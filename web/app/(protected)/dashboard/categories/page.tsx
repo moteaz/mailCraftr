@@ -14,7 +14,8 @@ import { CategoryCard } from '@/components/features/categories/category-card';
 import { CategoryForm } from '@/components/features/categories/category-form';
 import { useSearch } from '@/hooks/use-search';
 import { toast } from 'sonner';
-import type { Category, Project, ApiError } from '@/lib/api/types';
+import { MESSAGES } from '@/constants';
+import type { Category, Project, ApiError } from '@/types';
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -40,7 +41,7 @@ export default function CategoriesPage() {
         setProjects(projectsRes);
       } catch (err) {
         const error = err as ApiError;
-        toast.error(error.message || 'Failed to load data');
+        toast.error(error.message || MESSAGES.ERROR.LOAD_FAILED);
       } finally {
         setLoading(false);
       }
@@ -51,7 +52,7 @@ export default function CategoriesPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.projectId) {
-      toast.error('Name and project are required');
+      toast.error(MESSAGES.ERROR.REQUIRED_FIELDS);
       return;
     }
 
@@ -62,13 +63,13 @@ export default function CategoriesPage() {
         description: form.description,
         projectId: parseInt(form.projectId),
       });
-      toast.success('Category created successfully!');
+      toast.success(MESSAGES.SUCCESS.CATEGORY_CREATED);
       setCategories([...categories, response.category]);
       setForm({ name: '', description: '', projectId: '' });
       setIsModalOpen(false);
     } catch (err) {
       const error = err as ApiError;
-      toast.error(error.message || 'Failed to create category');
+      toast.error(error.message || MESSAGES.ERROR.CREATE_FAILED);
     } finally {
       setCreating(false);
     }
@@ -85,12 +86,12 @@ export default function CategoriesPage() {
         description: form.description,
       });
       setCategories(categories.map((c) => (c.id === editModal.id ? { ...c, ...updated } : c)));
-      toast.success('Category updated successfully!');
+      toast.success(MESSAGES.SUCCESS.CATEGORY_UPDATED);
       setEditModal(null);
       setForm({ name: '', description: '', projectId: '' });
     } catch (err) {
       const error = err as ApiError;
-      toast.error(error.message || 'Failed to update category');
+      toast.error(error.message || MESSAGES.ERROR.UPDATE_FAILED);
     } finally {
       setUpdating(false);
     }
@@ -103,11 +104,11 @@ export default function CategoriesPage() {
     try {
       await categoryService.delete(deleteModal);
       setCategories(categories.filter((c) => c.id !== deleteModal));
-      toast.success('Category deleted successfully!');
+      toast.success(MESSAGES.SUCCESS.CATEGORY_DELETED);
       setDeleteModal(null);
     } catch (err) {
       const error = err as ApiError;
-      toast.error(error.message || 'Failed to delete category');
+      toast.error(error.message || MESSAGES.ERROR.DELETE_FAILED);
     } finally {
       setDeleting(false);
     }

@@ -1,6 +1,6 @@
-import { STORAGE_KEYS } from '@/lib/constants';
+import { STORAGE_KEYS } from '@/constants';
 import { isTokenExpired } from './jwt';
-import type { User } from '@/lib/api/types';
+import type { User } from '@/types';
 
 export const session = {
   getToken(): string | null {

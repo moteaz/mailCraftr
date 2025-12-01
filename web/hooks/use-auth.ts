@@ -3,8 +3,8 @@ import { useAuthStore } from '@/store/auth-store';
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { session } from '@/lib/auth/session';
-import { ROUTES } from '@/lib/constants';
-import type { LoginRequest, LoginResponse } from '@/lib/api/types';
+import { ROUTES } from '@/constants';
+import type { LoginRequest, LoginResponse } from '@/types';
 
 export function useAuth() {
   const router = useRouter();

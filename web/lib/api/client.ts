@@ -1,5 +1,5 @@
-import { API_URL, STORAGE_KEYS, ROUTES } from '@/lib/constants';
-import type { ApiError } from './types';
+import { API_URL, STORAGE_KEYS, ROUTES } from '@/constants';
+import type { ApiError } from '@/types';
 
 class ApiClient {
   private baseURL: string;

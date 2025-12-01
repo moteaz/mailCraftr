@@ -1,6 +1,5 @@
 import { apiClient } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
-import type { User } from '@/lib/api/types';
 
 export const userService = {
   getAll: () => apiClient.get<any>(API_ENDPOINTS.USER.LIST),
