@@ -55,7 +55,7 @@ export default function WebhooksPage() {
         <SearchBar
           value={query}
           onChange={setQuery}
-          placeholder="🔍 Search webhooks by URL..."
+          placeholder="Search webhooks by URL..."
           resultCount={filtered.length}
           totalCount={webhooks.length}
         />
