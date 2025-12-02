@@ -8,8 +8,6 @@ interface PageHeaderProps {
   iconGradient?: string;
 }
 
-import type { LucideIcon } from 'lucide-react';
-
 export function PageHeader({ 
   icon: Icon, 
   title, 

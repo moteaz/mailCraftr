@@ -85,7 +85,8 @@ export default function CategoriesPage() {
         name: form.name,
         description: form.description,
       });
-      setCategories(categories.map((c) => (c.id === editModal.id ? { ...c, ...updated } : c)));
+      setCategories(categories.map((c) => (c.id === editModal.id ? { ...c, name: form.name, description: form.description } : c)));
+
       toast.success(MESSAGES.SUCCESS.CATEGORY_UPDATED);
       setEditModal(null);
       setForm({ name: '', description: '', projectId: '' });

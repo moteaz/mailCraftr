@@ -135,7 +135,7 @@ export default function TemplatesPage() {
           onCategoryChange={setSelectedCategory}
           categories={categories}
           resultCount={filteredTemplates.length}
-          hasActiveFilters={hasActiveFilters}
+          hasActiveFilters={!!hasActiveFilters}
           onClearFilters={clearFilters}
         />
 

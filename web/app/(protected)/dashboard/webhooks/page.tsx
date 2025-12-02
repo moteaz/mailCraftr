@@ -82,7 +82,7 @@ export default function WebhooksPage() {
       <CreateWebhookModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onCreate={createWebhook}
+        onCreate={async (data) => { await createWebhook(data); }}
       />
 
       <ConfirmDialog

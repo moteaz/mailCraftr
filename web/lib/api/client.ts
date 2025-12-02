@@ -1,5 +1,5 @@
-import { API_URL, STORAGE_KEYS, ROUTES } from '@/constants';
-import type { ApiError } from '@/types';
+import { API_URL, STORAGE_KEYS, ROUTES } from "@/constants";
+import type { ApiError } from "@/types";
 
 class ApiClient {
   private baseURL: string;
@@ -9,15 +9,15 @@ class ApiClient {
   }
 
   private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   }
 
   private handleUnauthorized(): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER);
-    document.cookie = 'accessToken=; path=/; max-age=0';
+    document.cookie = "accessToken=; path=/; max-age=0";
     window.location.href = ROUTES.LOGIN;
   }
 
@@ -26,14 +26,14 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const token = this.getToken();
-    
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options.headers,
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options.headers as Record<string, string>),
     };
 
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
     const response = await fetch(`${this.baseURL}${endpoint}`, {
@@ -48,7 +48,7 @@ class ApiClient {
         this.handleUnauthorized();
       }
       const error: ApiError = {
-        message: data.message || 'Request failed',
+        message: data.message || "Request failed",
         statusCode: response.status,
       };
       throw error;
@@ -58,26 +58,26 @@ class ApiClient {
   }
 
   async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+    return this.request<T>(endpoint, { method: "GET" });
   }
 
   async post<T>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
-      method: 'POST',
+      method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
   async patch<T>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
-      method: 'PATCH',
+      method: "PATCH",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
   async delete<T>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
-      method: 'DELETE',
+      method: "DELETE",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
