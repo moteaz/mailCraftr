@@ -40,6 +40,9 @@ lerna-debug.log*
 .env*.local
 !.env.example
 
+# Database
+dev.db
+
 # temp directory
 .temp
 .tmp
