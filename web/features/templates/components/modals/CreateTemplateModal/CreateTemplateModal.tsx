@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { aiService } from '@/lib/services/ai.service';
 import type { Category } from '@/types';
 
 interface CreateTemplateModalProps {
@@ -19,7 +20,9 @@ export function CreateTemplateModal({ isOpen, onClose, categories, onCreate }: C
     categorieId: '',
     placeholders: [] as { key: string; value: string }[],
   });
+  const [aiContent, setAiContent] = useState('');
   const [creating, setCreating] = useState(false);
+  const [extracting, setExtracting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -47,6 +50,24 @@ export function CreateTemplateModal({ isOpen, onClose, categories, onCreate }: C
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleAiExtract = async () => {
+    if (!aiContent.trim()) {
+      toast.error('Please enter some content first');
+      return;
+    }
+
+    setExtracting(true);
+    try {
+      const placeholders = await aiService.extractPlaceholders(aiContent);
+      setForm({ ...form, placeholders });
+      toast.success(`Extracted ${placeholders.length} placeholders using AI`);
+    } catch (err) {
+      toast.error('Failed to extract placeholders');
+    } finally {
+      setExtracting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -118,14 +139,46 @@ export function CreateTemplateModal({ isOpen, onClose, categories, onCreate }: C
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders (JSON File)</label>
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleJsonUpload}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
-              disabled={creating}
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Placeholders</label>
+            
+            {/* AI Extraction */}
+            <div className="mb-4 p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-semibold text-gray-800">AI Extraction</span>
+              </div>
+              <textarea
+                value={aiContent}
+                onChange={(e) => setAiContent(e.target.value)}
+                placeholder="Paste your content here and AI will extract placeholders automatically..."
+                disabled={creating || extracting}
+                rows={4}
+                className="block w-full px-3 py-2.5 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm resize-y mb-2"
+              />
+              <Button
+                type="button"
+                onClick={handleAiExtract}
+                loading={extracting}
+                loadingText="Extracting..."
+                icon={Sparkles}
+                disabled={!aiContent.trim() || creating}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                Extract with AI
+              </Button>
+            </div>
+
+            {/* Manual JSON Upload */}
+            <div className="mb-2">
+              <label className="block text-xs font-medium text-gray-600 mb-1">Or upload JSON file</label>
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleJsonUpload}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                disabled={creating}
+              />
+            </div>
             {form.placeholders.length > 0 && (
               <div className="mt-3 p-3 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
                 <p className="text-sm font-medium text-gray-700 mb-2">Loaded {form.placeholders.length} Placeholders:</p>
