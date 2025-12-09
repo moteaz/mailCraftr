@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PrismaModule } from '../../../prisma/prisma.module';
@@ -13,9 +13,9 @@ import { RefreshTokenRepository } from '../../common/repositories/refresh-token.
     PrismaModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('jwt.secret'),
-        signOptions: { expiresIn: config.get<string>('jwt.accessTokenExpiresIn') },
+      useFactory: (config: ConfigService): JwtModuleOptions => ({
+        secret: config.get<string>('jwt.secret') || 'fallback-secret',
+        signOptions: { expiresIn: (config.get<string>('jwt.accessTokenExpiresIn') || '1h') as any },
       }),
     }),
   ],
