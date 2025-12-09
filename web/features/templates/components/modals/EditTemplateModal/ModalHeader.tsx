@@ -50,7 +50,6 @@ export function ModalHeader({ template, onClose, onDownloadPDF }: ModalHeaderPro
         <div className="px-4 sm:px-6 pb-3 flex items-center gap-4 text-xs text-gray-600">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span>Auto-save</span>
           </div>
           <div className="hidden sm:flex items-center gap-1.5">
             <span>{template.placeholders?.length || 0} variables</span>

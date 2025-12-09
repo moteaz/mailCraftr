@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { Template } from '@/types';
 import { ModalHeader } from './ModalHeader';
 import { VariablesPanel } from './VariablesPanel';
@@ -27,14 +27,18 @@ export function EditTemplateModal({
   updating,
 }: EditTemplateModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const editorRef = useRef<any>(null);
 
   if (!template) return null;
 
   const insertPlaceholder = (key: string) => {
     const placeholder = `{{${key}}}`;
-    const editor = (window as any).__tiptapEditor;
-    if (editor) {
-      editor.chain().focus().insertContent(placeholder).run();
+    if (editorRef.current) {
+      editorRef.current.model.change((writer: any) => {
+        const insertPosition = editorRef.current.model.document.selection.getFirstPosition();
+        writer.insertText(placeholder, insertPosition);
+      });
+      editorRef.current.editing.view.focus();
     }
   };
 
@@ -62,6 +66,7 @@ export function EditTemplateModal({
             isFullscreen={isFullscreen}
             onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
             onShowPreview={onShowPreview}
+            editorRef={editorRef}
           />
         </div>
 

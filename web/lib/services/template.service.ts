@@ -6,7 +6,7 @@ export const templateService = {
   getMyTemplates: () => apiClient.get<Template[]>(API_ENDPOINTS.TEMPLATE.MY_TEMPLATES),
 
   create: (data: {
-    name: string;
+    name: string
     description: string;
     content: string;
     categorieId: number;

@@ -5,7 +5,8 @@ export default () => ({
   },
   jwt: {
     secret: process.env.JWT_SECRET,
-    expiresIn: '1h',
+    accessTokenExpiresIn: '1h',
+    refreshTokenExpiresIn: '7d',
   },
   frontend: {
     url: process.env.FRONTEND_URL || 'http://localhost:3000',

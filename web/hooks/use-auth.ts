@@ -14,6 +14,9 @@ export function useAuth() {
     const data = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
     
     session.setToken(data.accessToken);
+    if (data.refreshToken) {
+      session.setRefreshToken(data.refreshToken);
+    }
     session.setUser(data.user);
     setUser(data.user);
     

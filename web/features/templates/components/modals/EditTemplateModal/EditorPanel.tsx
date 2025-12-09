@@ -6,9 +6,10 @@ interface EditorPanelProps {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   onShowPreview: () => void;
+  editorRef: React.MutableRefObject<any>;
 }
 
-export function EditorPanel({ content, onContentChange, isFullscreen, onToggleFullscreen, onShowPreview }: EditorPanelProps) {
+export function EditorPanel({ content, onContentChange, isFullscreen, onToggleFullscreen, onShowPreview, editorRef }: EditorPanelProps) {
   return (
     <div className={`flex-1 flex flex-col overflow-hidden bg-white transition-all duration-300 ${isFullscreen ? 'lg:flex-[2]' : ''}`}>
       <div className="px-4 sm:px-6 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
@@ -54,6 +55,7 @@ export function EditorPanel({ content, onContentChange, isFullscreen, onToggleFu
             content={content}
             onChange={onContentChange}
             placeholder="Start writing..."
+            editorRef={editorRef}
           />
         </div>
       </div>

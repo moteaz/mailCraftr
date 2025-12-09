@@ -1,0 +1,59 @@
+DEVIS : {{numero_devis}}        {{client.nom}}
+Numéro Client : {{numero_client}}
+Date de devis : {{date_devis}}
+
+Adresse des travaux : {{chantier.adresse_travaux}}
+
+
+Détail                                    Qté     P.U HT      Total HT      TVA
+
+{{pac_details.code}} : {{pac_details.description}}
+Marque : {{pac_details.marque}}
+Référence : {{pac_details.reference}}
+Surface chauffée par la PAC : {{pac_details.surface_chauffee_m2}} m2
+Usage couvert par la PAC : {{pac_details.usage}}
+Coefficient de performance (COP) : {{pac_details.cop}}
+Puissance thermique nominale : {{pac_details.puissance_kw}} kW
+ETAS : {{pac_details.etas}}
+Réf Groupe Extérieur : {{pac_details.reference_unite_exterieure}}
+Réf Unité Intérieure : {{pac_details.reference_unite_interieure}}
+Régulateur de classe : {{pac_details.regulateur_classe}}
+
+Kwh Cumac : {{pac_details.kwh_cumac}}
+Prime CEE : {{pac_details.prime_cee_eur}} €
+
+Matériel fourni et installé par {{fournisseur_installateur.societe}}
+Représentant : {{fournisseur_installateur.representant}}
+SIRET : {{fournisseur_installateur.siret}}
+Certificat RGE N° {{fournisseur_installateur.certificat_rge.numero}}
+Attribué le : {{fournisseur_installateur.certificat_rge.date_attribution}}
+Expire le : {{fournisseur_installateur.certificat_rge.date_expiration}}
+Assurance N° {{fournisseur_installateur.assurance.numero}} - {{fournisseur_installateur.assurance.compagnie}}
+
+{{articles.0.designation}}  
+Marque : {{articles.0.marque}}
+Référence complète : {{articles.0.reference_complete}}
+Quantité : {{articles.0.quantite}} {{articles.0.unite}}
+P.U HT : {{articles.0.prix_unitaire_ht}} €
+Total HT : {{articles.0.total_ht}} €
+TVA : {{articles.0.tva}} %
+
+{{articles.1.designation}}
+- Installation complète
+- Module extérieur
+- Liaison hydraulique
+- Liaison frigorifique
+- Raccord aux installations existantes
+- Câblage alimentation & électrique
+- Purge radiateurs
+
+Quantité : {{articles.1.quantite}} {{articles.1.unite}}
+P.U HT : {{articles.1.prix_unitaire_ht}} €
+Total HT : {{articles.1.total_ht}} €
+TVA : {{articles.1.tva}} %
+
+----------------------------------------------------
+TOTAL HT : {{totaux.total_ht}} €
+TOTAL TVA : {{totaux.total_tva}} €
+TOTAL TTC : {{totaux.total_ttc}} €
+----------------------------------------------------

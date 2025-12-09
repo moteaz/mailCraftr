@@ -11,7 +11,16 @@ export const session = {
 
   setToken(token: string): void {
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
-    document.cookie = `accessToken=${token}; path=/; max-age=86400; SameSite=Lax`;
+    document.cookie = `accessToken=${token}; path=/; max-age=3600; SameSite=Lax`;
+  },
+
+  getRefreshToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+  },
+
+  setRefreshToken(token: string): void {
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
   },
 
   getUser(): User | null {
@@ -26,11 +35,12 @@ export const session = {
 
   clear(): void {
     localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER);
     document.cookie = 'accessToken=; path=/; max-age=0';
   },
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return !!this.getToken() || !!this.getRefreshToken();
   },
 };
