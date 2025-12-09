@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, Plus, Sparkles } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Plus, Sparkles, Edit2, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ export function CreateTemplateModal({ isOpen, onClose, categories, onCreate }: C
   const [aiContent, setAiContent] = useState('');
   const [creating, setCreating] = useState(false);
   const [extracting, setExtracting] = useState(false);
+  const placeholdersEndRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen) return null;
 
@@ -180,15 +181,75 @@ export function CreateTemplateModal({ isOpen, onClose, categories, onCreate }: C
               />
             </div>
             {form.placeholders.length > 0 && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
-                <p className="text-sm font-medium text-gray-700 mb-2">Loaded {form.placeholders.length} Placeholders:</p>
-                <div className="space-y-1">
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg max-h-64 overflow-y-auto">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-700">{form.placeholders.length} Placeholders</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForm({ ...form, placeholders: [...form.placeholders, { key: '', value: '' }] });
+                      setTimeout(() => placeholdersEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add
+                  </button>
+                </div>
+                <div className="space-y-2">
                   {form.placeholders.map((p, i) => (
-                    <div key={i} className="text-xs text-gray-600 font-mono">
-                      {`{{${p.key}}}`} = {p.value}
+                    <div key={i} className="flex items-center gap-2 bg-white p-2 rounded border border-gray-200">
+                      <input
+                        type="text"
+                        value={p.key}
+                        onChange={(e) => {
+                          const updated = [...form.placeholders];
+                          updated[i].key = e.target.value;
+                          setForm({ ...form, placeholders: updated });
+                        }}
+                        placeholder="key"
+                        className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        disabled={creating}
+                      />
+                      <span className="text-gray-400">=</span>
+                      <input
+                        type="text"
+                        value={p.value}
+                        onChange={(e) => {
+                          const updated = [...form.placeholders];
+                          updated[i].value = e.target.value;
+                          setForm({ ...form, placeholders: updated });
+                        }}
+                        placeholder="value"
+                        className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        disabled={creating}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = form.placeholders.filter((_, idx) => idx !== i);
+                          setForm({ ...form, placeholders: updated });
+                        }}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        disabled={creating}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
                     </div>
                   ))}
+                  <div ref={placeholdersEndRef} />
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForm({ ...form, placeholders: [...form.placeholders, { key: '', value: '' }] });
+                    setTimeout(() => placeholdersEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+                  }}
+                  className="w-full mt-2 py-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg font-medium flex items-center justify-center gap-1 border border-dashed border-blue-300 transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add Another
+                </button>
               </div>
             )}
             <p className="text-xs text-gray-500 mt-2">
